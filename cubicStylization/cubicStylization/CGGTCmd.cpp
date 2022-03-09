@@ -13,7 +13,6 @@ CGGTCmd::~CGGTCmd()
 
 const char* cubenessFlag = "-c", * cubenessLongFlag = "-cubeness";
 
-// Syntax creator function
 MSyntax CGGTCmd::newSyntax()
 {
 	MSyntax syntax;
@@ -23,12 +22,8 @@ MSyntax CGGTCmd::newSyntax()
 
 MStatus CGGTCmd::doIt(const MArgList& args)
 {
-	// message in Maya output window
-	cout << "Implement Me!" << endl;
-	std::cout.flush();
-
-	// message in script editor
-	MGlobal::displayInfo("Implement Me!");
+	// Uncomment this for testing
+	// MGlobal::displayInfo("Inside doIt function");
 
 	// Add command arguments
 	MString cubeness = "";

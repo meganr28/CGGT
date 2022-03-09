@@ -13,11 +13,13 @@ MTypeId     CGGTNode::id(0x8000);
 
 MStatus CGGTNode::compute(const MPlug& plug, MDataBlock& data) {
 	MStatus returnStatus;
+
 	if (plug == geometry) {
 		// MGlobal::displayInfo("Hello World!");
-		
+
+		// Input handles
 		MDataHandle cubenessData = data.inputValue(cubeness, &returnStatus);
-		McheckErr(returnStatus, "Error getting time data handle\n");
+		McheckErr(returnStatus, "Error getting cubeness data handle\n");
 		double cubeness_data = cubenessData.asDouble();
 		if (cubeness_data == 0) {
 			return MS::kSuccess;
@@ -30,6 +32,7 @@ MStatus CGGTNode::compute(const MPlug& plug, MDataBlock& data) {
 			return MS::kSuccess;
 		}
 
+		// Testing code
 		MString cubenessStr = std::to_string(cubeness_data).c_str();
 		MString facesStr = std::to_string(coarsefaces_data).c_str();
 
@@ -40,6 +43,7 @@ MStatus CGGTNode::compute(const MPlug& plug, MDataBlock& data) {
 	}
 	else
 		return MS::kUnknownParameter;
+
 	return MS::kSuccess;
 }
 
@@ -53,40 +57,42 @@ MStatus CGGTNode::initialize() {
 	MFnNumericAttribute numericAttr;
 	MStatus returnStatus;
 
+	// Create attributes
 	CGGTNode::cubeness = numericAttr.create("cubeness", "c",
 		MFnNumericData::kDouble,
 		0.0, &returnStatus);
-	McheckErr(returnStatus, "ERROR creating animCube time attribute\n");
+	McheckErr(returnStatus, "ERROR creating CGGTNode cubeness attribute\n");
 
 	CGGTNode::coarse_faces = numericAttr.create("coarse_faces", "f",
 		MFnNumericData::kDouble,
 		0.0, &returnStatus);
-	McheckErr(returnStatus, "ERROR creating animCube time attribute\n");
-
+	McheckErr(returnStatus, "ERROR creating CGGTNode coarse faces attribute\n");
 
 	CGGTNode::geometry = typedAttr.create("geometry", "geom",
 		MFnData::kMesh,
 		MObject::kNullObj,
 		&returnStatus);
-	McheckErr(returnStatus, "ERROR creating animCube output attribute\n");
+	McheckErr(returnStatus, "ERROR creating CGGTNode output geometry attribute\n");
 	typedAttr.setStorable(false);
 
+	// Add attributes
 	returnStatus = addAttribute(CGGTNode::cubeness);
-	McheckErr(returnStatus, "ERROR adding angle attribute\n");
+	McheckErr(returnStatus, "ERROR adding cubeness attribute\n");
 
 	returnStatus = addAttribute(CGGTNode::coarse_faces);
-	McheckErr(returnStatus, "ERROR adding stepsize attribute\n");
+	McheckErr(returnStatus, "ERROR adding coarse faces attribute\n");
 
 	returnStatus = addAttribute(CGGTNode::geometry);
-	McheckErr(returnStatus, "ERROR adding outputMesh attribute\n");
+	McheckErr(returnStatus, "ERROR adding geometry attribute\n");
 
+	// Attribute affects
 	returnStatus = attributeAffects(CGGTNode::cubeness,
 		CGGTNode::geometry);
-	McheckErr(returnStatus, "ERROR in attributeAffects\n");
+	McheckErr(returnStatus, "ERROR in cubeness attributeAffects\n");
 
 	returnStatus = attributeAffects(CGGTNode::coarse_faces,
 		CGGTNode::geometry);
-	McheckErr(returnStatus, "ERROR in attributeAffects\n");
+	McheckErr(returnStatus, "ERROR in coarse faces attributeAffects\n");
 
 	return MS::kSuccess;
 }
