@@ -26,7 +26,7 @@ MStatus CGGTNode::compute(const MPlug& plug, MDataBlock& data) {
 		}
 
 		MDataHandle coarseFacesData = data.inputValue(coarse_faces, &returnStatus);
-		McheckErr(returnStatus, "Error getting time data handle\n");
+		McheckErr(returnStatus, "Error getting coarse faces data handle\n");
 		double coarsefaces_data = coarseFacesData.asDouble();
 		if (coarsefaces_data == 0) {
 			return MS::kSuccess;
