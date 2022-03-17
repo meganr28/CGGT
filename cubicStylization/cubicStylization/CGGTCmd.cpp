@@ -3,6 +3,8 @@
 #include <maya/MGlobal.h>
 #include <list>
 
+// #define TESTING_CODE
+
 CGGTCmd::CGGTCmd() : MPxCommand()
 {
 }
@@ -38,6 +40,12 @@ MStatus CGGTCmd::doIt(const MArgList& args)
 	// Create sphere with radius 'cubeness'
 	// MGlobal::executeCommand("polySphere -r " + cubeness + "; ");
 
+	// Get vector of vertices
+
+	// Call cubic stylization function
+
+
+#ifdef TESTING_CODE
 	// mapping from face id to its 3 vertex ids
 	std::unordered_map<int, std::vector<int>> imTheMap;
 
@@ -87,6 +95,7 @@ MStatus CGGTCmd::doIt(const MArgList& args)
 		vertexIter.next();
 
 	}
+#endif
 
 	return MStatus::kSuccess;
 }

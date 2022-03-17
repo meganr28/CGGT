@@ -24,12 +24,42 @@
     <ClCompile Include="CGGTCmd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Vertex.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="localstep.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="globalstep.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cubicstylization.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CGGTNode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CGGTCmd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="localstep.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="globalstep.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cubicstylization.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
