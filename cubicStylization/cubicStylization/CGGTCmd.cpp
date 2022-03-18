@@ -43,6 +43,8 @@ MStatus CGGTCmd::doIt(const MArgList& args)
 	// Get vector of vertices
 
 	// Call cubic stylization function
+	std::vector<Vertex> verticesList;
+	getMeshVertices(verticesList);
 
 
 #ifdef TESTING_CODE

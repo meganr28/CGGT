@@ -12,6 +12,9 @@
 #include <maya/MSelectionList.h>
 #include <maya/MFloatPointArray.h>
 #include <maya/MItMeshVertex.h>
+#include "Vertex.h"
+#include "cubicstylization.h"
+#include "utils.h"
 
 class CGGTCmd : public MPxCommand
 {
