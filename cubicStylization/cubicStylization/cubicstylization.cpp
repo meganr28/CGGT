@@ -1,8 +1,9 @@
 #include "cubicstylization.h"
 
-void cubicStylization(const std::vector<Vertex>& V, float cubeness)
+void cubicStylization(std::vector<Vertex>& V, float cubeness)
 {
 	// Precomputation
+	getMeshVertices(V, cubeness);
 	
 	// while not converged:
 		// Local step

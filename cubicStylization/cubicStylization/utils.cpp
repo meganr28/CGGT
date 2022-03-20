@@ -1,6 +1,6 @@
 #include "utils.h"
 
-void getMeshVertices(std::vector<Vertex>& V) {
+void getMeshVertices(std::vector<Vertex>& V, double cubeness) {
 	std::unordered_map<int, std::vector<int>> faceToVertices;
 
 	MDagPath node;
@@ -19,13 +19,64 @@ void getMeshVertices(std::vector<Vertex>& V) {
 	MFloatPointArray vertexPositions;
 	selectedObject.getPoints(vertexPositions, MSpace::kWorld);
 
+	// Get lambda * area term for all vertices
+	MatrixXd vertPositions(vertexPositions.length(), 3);
+	for (int v = 0; v < vertexPositions.length(); ++v) {
+		vertPositions(v, 0) = vertexPositions[v][0];
+		vertPositions(v, 1) = vertexPositions[v][1];
+		vertPositions(v, 2) = vertexPositions[v][2];
+	}
+
+	int numPolygons = selectedObject.numPolygons();
+	MatrixXi facePositions(numPolygons, 3);
+	for (int f = 0; f < numPolygons; ++f) {
+		MIntArray faceVerts;
+		selectedObject.getPolygonVertices(f, faceVerts);
+
+		facePositions(f, 0) = faceVerts[0];
+		facePositions(f, 1) = faceVerts[1];
+		facePositions(f, 2) = faceVerts[2];
+	}
+	
+	SparseMatrix<double> areaMatrix;
+	igl::massmatrix(vertPositions, facePositions, igl::MASSMATRIX_TYPE_BARYCENTRIC, areaMatrix);
+
+	// Cube normals
+	std::vector<MFloatPoint> cubeNormals = { MFloatPoint(1, 0, 0), MFloatPoint(-1, 0, 0),
+											 MFloatPoint(0, 1, 0), MFloatPoint(0, -1, 0),
+											 MFloatPoint(0, 0, 1), MFloatPoint(0, 0, -1) };
+
 	MItMeshVertex vertexIter(node);
 	MIntArray connected_faces;
+	SparseMatrix<double> weightMatrix;
 	for (int i = 0; i < vertexPositions.length(); ++i) {
 		int index = vertexIter.index();
+
+		// Get face edges (Nk) and weights (W)
 		vertexIter.getConnectedFaces(connected_faces);
 		MatrixXd neighborEdges(3,3 * connected_faces.length());
-		getNeighborFaceEdges(selectedObject, connected_faces, vertexPositions, neighborEdges);
+		getNeighborFaceEdgesAndWeights(selectedObject, connected_faces, vertexPositions, neighborEdges, weightMatrix);
+
+		// Get vertex normal
+		MVector vertNormal;
+		selectedObject.getVertexNormal(i, false, vertNormal, MSpace::kWorld);
+		VectorXd vertexNormal(3);
+		vertexNormal << vertNormal[0], vertNormal[1], vertNormal[2];
+
+		// Get lambda * area
+		VectorXd areaDiagonal = areaMatrix.diagonal();
+		double lambdaA = cubeness * areaDiagonal(i);
+
+		// Get target (snapped) normal
+		MFloatPoint snapNormal;
+		getSnappedNormal(vertNormal, cubeNormals, snapNormal);
+		VectorXd snappedNormal(3);
+		snappedNormal << snapNormal[0], snapNormal[1], snapNormal[2];
+
+		// Make Vertex object and store in Vertex array
+		VectorXd vertexPosition(3);
+		vertexPosition << vertexPositions[i][0], vertexPositions[i][1], vertexPositions[i][2];
+		Vertex v = Vertex(i, vertexPosition, neighborEdges, neighborEdges, weightMatrix, snappedNormal, vertexNormal, lambdaA);
 
 		std::stringstream ss;
 		ss << neighborEdges;
@@ -35,8 +86,13 @@ void getMeshVertices(std::vector<Vertex>& V) {
 	}
 }
 
-void getNeighborFaceEdges(const MFnMesh& selectedObject, const MIntArray& connected_faceIDs, const MFloatPointArray& vertexPositions, MatrixXd& edgeMatrix) {
+void getNeighborFaceEdgesAndWeights(const MFnMesh& selectedObject, const MIntArray& connected_faceIDs, const MFloatPointArray& vertexPositions, MatrixXd& edgeMatrix, SparseMatrix<double>& weightMatrix) {
 	int matindex = 0;
+	MatrixXd vertPositions(connected_faceIDs.length() + 1, 3);
+	MatrixXi meshFaces(connected_faceIDs.length(), 3);
+	std::unordered_map<int, int> globalToLocalIdx;
+
+	int vertPosRow = 0;
 	for (int i = 0; i < connected_faceIDs.length(); ++i) {
 		MIntArray connected_vertices;
 		selectedObject.getPolygonVertices(connected_faceIDs[i], connected_vertices);
@@ -45,10 +101,30 @@ void getNeighborFaceEdges(const MFnMesh& selectedObject, const MIntArray& connec
 		MFloatPoint vert2 = vertexPositions[connected_vertices[1]];
 		MFloatPoint vert3 = vertexPositions[connected_vertices[2]];
 
+		// Insert vertex indices into global to local map
+		for (int j = 0; j < 3; ++j) {
+			MFloatPoint vert = vertexPositions[connected_vertices[j]];
+			std::unordered_map<int, int>::const_iterator vPosIt = globalToLocalIdx.find(connected_vertices[j]);
+			if (vPosIt == globalToLocalIdx.end()) {
+				globalToLocalIdx.insert(std::pair<int, int>(connected_vertices[j], vertPosRow));
+
+				// Add to vertex position array for cotmatrix
+				vertPositions(vertPosRow, 0) = vert[0];
+				vertPositions(vertPosRow, 1) = vert[1];
+				vertPositions(vertPosRow, 2) = vert[2];
+
+				vertPosRow++;
+			}
+		}
+
+		// Initialize face matrix for comatrix
+		meshFaces(i, 0) = globalToLocalIdx.at(connected_vertices[0]);
+		meshFaces(i, 1) = globalToLocalIdx.at(connected_vertices[1]);
+		meshFaces(i, 2) = globalToLocalIdx.at(connected_vertices[2]);
+
 		VectorXd edge1 { {vert1.x - vert2.x, vert1.y - vert2.y, vert1.z - vert2.z} };
 		VectorXd edge2 { {vert2.x - vert3.x, vert2.y - vert3.y, vert2.z - vert3.z} };
 		VectorXd edge3 { {vert3.x - vert1.x, vert3.y - vert1.y, vert3.z - vert1.z} };
-
 
 		edgeMatrix(0, matindex) = edge1[0];
 		edgeMatrix(1, matindex) = edge1[1];
@@ -65,14 +141,31 @@ void getNeighborFaceEdges(const MFnMesh& selectedObject, const MIntArray& connec
 		edgeMatrix(2, matindex) = edge3[2];
 		matindex++;
 
-
-		//igl::cotmatrix(vertexPositions)
-
-
 	}
+
+	igl::cotmatrix(vertPositions, meshFaces, weightMatrix);
 	
 }
 
-void getEdgeWeight(const MFnMesh& selectedObject, const MIntArray& connected_faceIDs, const MFloatPointArray& vertexPositions, MatrixXd& edgeMatrix) {
+void getSnappedNormal(const MFloatPoint& vertexNormal, const std::vector<MFloatPoint>& cubeNormals, MFloatPoint& snappedNormal) {
+	int matchIdx = 0;
+	double max = -INFINITY;
+	for (int i = 0; i < cubeNormals.size(); ++i) {
+		MFloatPoint cubeNormal = cubeNormals.at(i);
+		double cosTheta = vertexNormal.x * cubeNormal.x + vertexNormal.y * cubeNormal.y + vertexNormal.z * cubeNormal.z;
+		if (cosTheta > max) {
+			max = cosTheta;
+			matchIdx = i;
+		}
+	}
 
+	snappedNormal = cubeNormals.at(matchIdx);
+}
+
+double getL1Norm(const MFloatPoint& vertexNormal) {
+	double absX = std::abs(vertexNormal[0]);
+	double absY = std::abs(vertexNormal[1]);
+	double absZ = std::abs(vertexNormal[2]);
+
+	return absX + absY + absZ;
 }

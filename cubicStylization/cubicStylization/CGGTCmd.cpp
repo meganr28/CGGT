@@ -28,24 +28,22 @@ MStatus CGGTCmd::doIt(const MArgList& args)
 	// MGlobal::displayInfo("Inside doIt function");
 
 	// Add command arguments
-	MString cubeness = "";
+	MString cubenessArg = "";
 	MArgDatabase argData(syntax(), args);
 
 	// Check for command line argument
 	if (argData.isFlagSet(cubenessFlag)) {
-		argData.getFlagArgument(cubenessFlag, 0, cubeness);
-		MGlobal::displayInfo("Step Size Set: " + cubeness);
+		argData.getFlagArgument(cubenessFlag, 0, cubenessArg);
+		MGlobal::displayInfo("Step Size Set: " + cubenessArg);
 	}
+	double cubeness = cubenessArg.asDouble();
 
 	// Create sphere with radius 'cubeness'
 	// MGlobal::executeCommand("polySphere -r " + cubeness + "; ");
 
-	// Get vector of vertices
-
 	// Call cubic stylization function
-	std::vector<Vertex> verticesList;
-	getMeshVertices(verticesList);
-
+	std::vector<Vertex> V;
+	cubicStylization(V, cubeness);
 
 #ifdef TESTING_CODE
 	// mapping from face id to its 3 vertex ids

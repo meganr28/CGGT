@@ -18,8 +18,10 @@
 #include "igl/cotmatrix.h"
 
 
-void getMeshVertices(std::vector<Vertex>& V);
+void getMeshVertices(std::vector<Vertex>& V, double cubeness);
 
-void getNeighborFaceEdges(const MFnMesh &selectedObject, const MIntArray &connected_faceIDs, const MFloatPointArray &vertexPositions, MatrixXd& edgeMatrix);
+void getNeighborFaceEdgesAndWeights(const MFnMesh &selectedObject, const MIntArray &connected_faceIDs, const MFloatPointArray &vertexPositions, MatrixXd& edgeMatrix, SparseMatrix<double> &weightMatrix);
 
-void getEdgeWeight(const MFnMesh& selectedObject, const MIntArray& connected_faceIDs, const MFloatPointArray& vertexPositions, MatrixXd& edgeMatrix);
+void getSnappedNormal(const MFloatPoint& vertexNormal, const std::vector<MFloatPoint> &cubeNormals, MFloatPoint& snappedNormal);
+
+double getL1Norm(const MFloatPoint& vertexNormal);
