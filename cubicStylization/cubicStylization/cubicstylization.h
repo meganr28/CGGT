@@ -7,4 +7,4 @@
 
 #include <vector>
 
-void cubicStylization(std::vector<Vertex>& V, float cubeness);
+void cubicStylization(std::vector<Vertex>& Vi, float cubeness);

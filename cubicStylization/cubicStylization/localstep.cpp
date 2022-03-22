@@ -1,14 +1,40 @@
 #include "localstep.h"
 
-void local_step(const std::vector<Vertex>& V, std::vector<Vertex>& V_d, float cubeness)
+void local_step(std::vector<Vertex>& Vd)
 {
-	// For each vertex in V:
-		// Make input edge vectors(Ek)-- > store in matrix for SVD
-		//	Get edge vectors'
-		//	Get target normal vector(tk) with snap_normals()->pre - defined set of cube normals
-		//	Get input normal vector
-		//	Get lambda * a - igl function
-		//	Get weights for each edge vector - igl function-- > store in matrix for SVD
-	//Initialize Vertex object with above info
-	//Push back to vector<Vertex>
+	for (unsigned int i = 0; i < Vd.size(); ++i) {
+		
+
+		// creating first matrix containing E_k and n_k in the last column
+		MatrixXd Ek_nk = Vd[i].Ek;
+		Ek_nk.conservativeResize(Ek_nk.rows(), Ek_nk.cols() + 1);
+		Ek_nk.col(Ek_nk.cols() - 1) = Vd[i].nk;
+
+		// creating second matrix containing W_k and lamda * a_k
+		MatrixXd Wk_lam_ak = Vd[i].W;
+		Wk_lam_ak.conservativeResize(Wk_lam_ak.rows() + 1, Wk_lam_ak.cols() + 1);
+		Wk_lam_ak(Wk_lam_ak.rows() - 1, Wk_lam_ak.cols() - 1) = Vd[i].lambda_a;
+
+		// creating third matrix containing E_kd and t_k
+		MatrixXd Ekd_tk = Vd[i].Ek_p.transpose();
+		Ekd_tk.conservativeResize(Ekd_tk.rows() + 1, Ekd_tk.cols());
+		Ekd_tk.row(Ekd_tk.rows() - 1) = Vd[i].tk.transpose();
+		
+
+
+		// multiplying three matrices together to get X_k matrix
+		MatrixXd X_k = Ek_nk * Wk_lam_ak * Ekd_tk;
+
+		// performing SVD on X_k matrix to get 3 matrices, U_k, Sigma_k, and V_k
+		JacobiSVD<MatrixXd> svd(X_k, ComputeFullU | ComputeFullV);
+		
+		MatrixXd V_svd_T = svd.matrixV();
+		MatrixXd U_svd_T = svd.matrixU().transpose();
+		Vd[i].R = V_svd_T * U_svd_T;
+
+		if (Vd[i].R.determinant() < 0) {
+			U_svd_T.row(3) = -U_svd_T.row(3);
+			Vd[i].R = V_svd_T * U_svd_T;
+		}
+	}
 }
