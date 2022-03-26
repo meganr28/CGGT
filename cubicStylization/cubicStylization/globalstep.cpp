@@ -1,8 +1,11 @@
 #include "globalstep.h"
 
-void global_step(std::vector<Vertex>& Vd)
+void global_step(MatrixXd& Vd, const MatrixXd& Rall, const MatrixXd& Q, const MatrixXd& K)
 {
-	// Initialize Q - symmetric matrix
-	// Intialize K - constant terms
 	// Solve linear system
+	MatrixXd RallT = Rall.transpose();
+	MatrixXd KT = K.transpose();
+	MatrixXd Qinv = Q.inverse();
+
+	Vd = Qinv * KT * RallT;
 }
