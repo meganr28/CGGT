@@ -17,9 +17,10 @@
 #include "Vertex.h"
 #include "igl/arap_rhs.h"
 #include "igl/cotmatrix.h"
+#include "igl/min_quad_with_fixed.h"
 
 
-void precompute(std::vector<Vertex>& Vi, SparseMatrix<double>& Q, SparseMatrix<double>& K, double cubeness);
+void precompute(MFnMesh& selectedObject, MDagPath& node, std::vector<Vertex>& Vi, SparseMatrix<double>& Q, SparseMatrix<double>& K, MatrixXd& bc, VectorXi& b, igl::min_quad_with_fixed_data<double>& solver_data, double cubeness);
 
 void getNeighborFaceEdgesAndWeights(const MFnMesh &selectedObject, const MIntArray &connected_faceIDs, const MFloatPointArray &vertexPositions, MatrixXd& edgeMatrix, SparseMatrix<double>& Q, SparseMatrix<double> &weightMatrix);
 

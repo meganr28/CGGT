@@ -1,21 +1,21 @@
 #include "utils.h"
 
-void precompute(std::vector<Vertex>& Vi, SparseMatrix<double>& Q, SparseMatrix<double>& K, double cubeness) {
+void precompute(MFnMesh& selectedObject, MDagPath& node, std::vector<Vertex>& Vi, SparseMatrix<double>& Q, SparseMatrix<double>& K, MatrixXd& bc, VectorXi& b, igl::min_quad_with_fixed_data<double>& solver_data, double cubeness) {
 	std::unordered_map<int, std::vector<int>> faceToVertices;
 
-	MDagPath node;
-	MObject component;
-	MSelectionList list;
-	MFnDagNode nodeFn;
-	MGlobal::getActiveSelectionList(list);
-	if (list.length() == 0) {
-		// no mesh selected
-		return;
-	}
-	list.getDagPath(0, node, component);
-	nodeFn.setObject(node);
-	MGlobal::displayInfo(nodeFn.name().asChar());
-	MFnMesh selectedObject(node);
+	//MDagPath node;
+	//MObject component;
+	//MSelectionList list;
+	//MFnDagNode nodeFn;
+	//MGlobal::getActiveSelectionList(list);
+	//if (list.length() == 0) {
+	//	// no mesh selected
+	//	return;
+	//}
+	//list.getDagPath(0, node, component);
+	//nodeFn.setObject(node);
+	//MGlobal::displayInfo(nodeFn.name().asChar());
+	//MFnMesh selectedObject(node);
 	MFloatPointArray vertexPositions;
 	selectedObject.getPoints(vertexPositions, MSpace::kWorld);
 
@@ -26,6 +26,10 @@ void precompute(std::vector<Vertex>& Vi, SparseMatrix<double>& Q, SparseMatrix<d
 		vertPositions(v, 1) = vertexPositions[v][1];
 		vertPositions(v, 2) = vertexPositions[v][2];
 	}
+
+	bc = vertPositions.row(0);
+	b(0) = 0;
+
 
 	int numPolygons = selectedObject.numPolygons();
 	MatrixXi facePositions(numPolygons, 3);
@@ -41,10 +45,14 @@ void precompute(std::vector<Vertex>& Vi, SparseMatrix<double>& Q, SparseMatrix<d
 	// GLOBAL STEP PRECOMPUTATION
 	getGlobalMatrices(vertPositions, facePositions, Q, K);
 
-	std::stringstream qss;
-	qss << Q;
-	MGlobal::displayInfo(("Q: \n" + qss.str()).c_str());
-	
+	//std::stringstream qss;
+	//qss << Q;
+	//MGlobal::displayInfo(("Q: \n" + qss.str()).c_str());
+
+	//std::stringstream qss1;
+	//qss1 << K;
+	//MGlobal::displayInfo(("K: \n" + qss1.str()).c_str());
+
 	// LOCAL STEP PRECOMPUTATION
 	// Get lambda * area term for all vertices
 	SparseMatrix<double> areaMatrix;
@@ -59,6 +67,11 @@ void precompute(std::vector<Vertex>& Vi, SparseMatrix<double>& Q, SparseMatrix<d
 	MIntArray connected_faces;
 	for (int i = 0; i < vertexPositions.length(); ++i) {
 		int index = vertexIter.index();
+		std::stringstream qss2;
+		qss2 << vertexPositions[index];
+		MGlobal::displayInfo(("vertex position: \n" + qss2.str()).c_str());
+
+
 
 		// Get face edges (Nk) and weights (W)
 		vertexIter.getConnectedFaces(connected_faces);
@@ -76,9 +89,11 @@ void precompute(std::vector<Vertex>& Vi, SparseMatrix<double>& Q, SparseMatrix<d
 		VectorXd vertexNormal(3);
 		vertexNormal << vertNormal[0], vertNormal[1], vertNormal[2];
 
+
 		// Get lambda * area
 		VectorXd areaDiagonal = areaMatrix.diagonal();
 		double lambdaA = cubeness * areaDiagonal(i);
+
 
 		// Get target (snapped) normal
 		MFloatPoint snapNormal;
@@ -99,6 +114,10 @@ void precompute(std::vector<Vertex>& Vi, SparseMatrix<double>& Q, SparseMatrix<d
 
 	}
 
+	igl::min_quad_with_fixed_precompute(Q, b, SparseMatrix<double>(), false, solver_data);
+
+	MGlobal::displayInfo(("number of vertices: \n" + std::to_string(Vi.size())).c_str());
+
 }
 
 void getNeighborFaceEdgesAndWeights(const MFnMesh& selectedObject, const MIntArray& connected_faceIDs, const MFloatPointArray& vertexPositions, MatrixXd& edgeMatrix, SparseMatrix<double>& Q, SparseMatrix<double>& weightMatrix) {
@@ -113,9 +132,9 @@ void getNeighborFaceEdgesAndWeights(const MFnMesh& selectedObject, const MIntArr
 		MIntArray connected_vertices;
 		selectedObject.getPolygonVertices(connected_faceIDs[i], connected_vertices);
 
-		std::stringstream cvss;
-		cvss << connected_vertices;
-		MGlobal::displayInfo(("ConnectedVertices: \n" + cvss.str()).c_str());
+		std::stringstream ssd;
+		ssd << connected_faceIDs[i];
+		MGlobal::displayInfo(("connected_faceIDs[i]: \n" + ssd.str()).c_str());
 
 		MFloatPoint vert1 = vertexPositions[connected_vertices[0]];
 		MFloatPoint vert2 = vertexPositions[connected_vertices[1]];
@@ -166,15 +185,17 @@ void getNeighborFaceEdgesAndWeights(const MFnMesh& selectedObject, const MIntArr
 			int ki = k % 3;
 			int kj = (k + 1) % 3;
 			weightMatrix.coeffRef(weightRow, weightRow) = Q.coeffRef(connected_vertices[ki], connected_vertices[kj]);
+
+			//MGlobal::displayInfo((std::to_string(connected_vertices[ki]) + " " + std::to_string(connected_vertices[kj])).c_str());
 			weightRow++;
 		}
+
 	}
 
-	//igl::cotmatrix(vertPositions, meshFaces, weightMatrix);
-	std::stringstream ss;
+	/*std::stringstream ss;
 	ss << weightMatrix;
 	MGlobal::displayInfo(("Weight matrix: \n" + ss.str()).c_str());
-	
+	*/
 }
 
 void getSnappedNormal(const MFloatPoint& vertexNormal, const std::vector<MFloatPoint>& cubeNormals, MFloatPoint& snappedNormal) {

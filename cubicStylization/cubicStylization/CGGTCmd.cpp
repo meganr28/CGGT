@@ -42,6 +42,7 @@ MStatus CGGTCmd::doIt(const MArgList& args)
 	// MGlobal::executeCommand("polySphere -r " + cubeness + "; ");
 
 	// Call cubic stylization function
+	
 	std::vector<Vertex> V;
 	cubicStylization(V, cubeness);
 
