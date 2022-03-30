@@ -43,8 +43,8 @@ void cubicStylization(std::vector<Vertex>& Vi, float cubeness)
 	double stopping_criteria = 0.001;
 	//double diff = std::numeric_limits<float>::max();
 	double diff = 1.f;
-	int iteration = 0;
-	MatrixXd Rall(3, Vi.size() * 3);
+	int iteration = 1;
+	MatrixXd Rall(Vi.size() * 3, 3);
 	std::vector<Vertex>& Vd = Vi;
 	while (diff > stopping_criteria) {
 		for (unsigned int i = 0; i < Vi.size(); ++i) {

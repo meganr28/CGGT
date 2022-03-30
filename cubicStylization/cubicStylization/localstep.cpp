@@ -10,6 +10,9 @@ void local_step(std::vector<Vertex>& Vd, MatrixXd& Rall)
 		Ek_nk.conservativeResize(Ek_nk.rows(), Ek_nk.cols() + 1);
 		Ek_nk.col(Ek_nk.cols() - 1) = Vd[i].nk;
 
+		/*std::stringstream ss2;
+		ss2 << Ek_nk;
+		MGlobal::displayInfo(("Ek_nk: \n" + ss2.str()).c_str());*/
 		
 		// creating second matrix containing W_k and lamda * a_k
 		MatrixXd Wk_lam_ak = Vd[i].W;
@@ -22,6 +25,10 @@ void local_step(std::vector<Vertex>& Vd, MatrixXd& Rall)
 		}
 		Wk_lam_ak(Wk_lam_ak.rows() - 1, Wk_lam_ak.cols() - 1) = Vd[i].lambda_a;
 
+		/*std::stringstream ssa2;
+		ssa2 << Wk_lam_ak;
+		MGlobal::displayInfo(("Wk_lam_ak: \n" + ssa2.str()).c_str());*/
+
 		
 
 		// creating third matrix containing E_kd and t_k
@@ -29,11 +36,15 @@ void local_step(std::vector<Vertex>& Vd, MatrixXd& Rall)
 		Ekd_tk.conservativeResize(Ekd_tk.rows() + 1, Ekd_tk.cols());
 		Ekd_tk.row(Ekd_tk.rows() - 1) = Vd[i].tk.transpose();
 		
+		/*std::stringstream ssas2;
+		ssas2 << Ekd_tk;
+		MGlobal::displayInfo(("Ekd_tk: \n" + ssas2.str()).c_str());*/
 		
-
 		// multiplying three matrices together to get X_k matrix
 		MatrixXd X_k = Ek_nk * Wk_lam_ak * Ekd_tk;
-
+		/*std::stringstream ssass2;
+		ssass2 << X_k;
+		MGlobal::displayInfo(("X_k: \n" + ssass2.str()).c_str());*/
 		// performing SVD on X_k matrix to get 3 matrices, U_k, Sigma_k, and V_k
 		JacobiSVD<MatrixXd> svd(X_k, ComputeFullU | ComputeFullV);
 		
@@ -41,25 +52,38 @@ void local_step(std::vector<Vertex>& Vd, MatrixXd& Rall)
 		MatrixXd U_svd_T = svd.matrixU().transpose();
 		Vd[i].R = V_svd_T * U_svd_T;
 
+
+
+		/*std::stringstream ssasss2;
+		ssasss2 << V_svd_T;
+		MGlobal::displayInfo(("V_svd_T: \n" + ssasss2.str()).c_str());
+		std::stringstream ssassds2;
+		ssassds2 << U_svd_T;
+		MGlobal::displayInfo(("U_svd_T: \n" + ssassds2.str()).c_str());*/
+
+
 		if (Vd[i].R.determinant() < 0) {
 			U_svd_T.row(3) = -U_svd_T.row(3);
 			Vd[i].R = V_svd_T * U_svd_T;
 		}
-
-		Rall(0, RallCounter) = Vd[i].R(0, 0);
-		Rall(1, RallCounter) = Vd[i].R(1, 0);
-		Rall(2, RallCounter) = Vd[i].R(2, 0);
+		/*std::stringstream ssassdsd2;
+		ssassdsd2 << Vd[i].R;
+		MGlobal::displayInfo(("Vd[i].R: \n" + ssassdsd2.str()).c_str());*/
+		
+		Rall(RallCounter, 0) = Vd[i].R(0, 0);
+		Rall(RallCounter, 1) = Vd[i].R(0, 1);
+		Rall(RallCounter, 2) = Vd[i].R(0, 2);
 		RallCounter++;
-		Rall(0, RallCounter) = Vd[i].R(0, 1);
-		Rall(1, RallCounter) = Vd[i].R(1, 1);
-		Rall(2, RallCounter) = Vd[i].R(2, 1);
+		Rall(RallCounter, 0) = Vd[i].R(1, 0);
+		Rall(RallCounter, 1) = Vd[i].R(1, 1);
+		Rall(RallCounter, 2) = Vd[i].R(1, 2);
 		RallCounter++;
-		Rall(0, RallCounter) = Vd[i].R(0, 2);
-		Rall(1, RallCounter) = Vd[i].R(1, 2);
-		Rall(2, RallCounter) = Vd[i].R(2, 2);
+		Rall(RallCounter, 0) = Vd[i].R(2, 0);
+		Rall(RallCounter, 1) = Vd[i].R(2, 1);
+		Rall(RallCounter, 2) = Vd[i].R(2, 2);
 		RallCounter++;
 	}
-	std::stringstream ss;
-	ss << Rall;
-	MGlobal::displayInfo(("Rall: \n" + ss.str()).c_str());
+	//std::stringstream ss;
+	//ss << Rall;
+	//MGlobal::displayInfo(("Rall: \n" + ss.str()).c_str());
 }
