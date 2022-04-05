@@ -35,4 +35,6 @@ struct globalData {
 	igl::min_quad_with_fixed_data<double> solver_data;
 	SparseMatrix<double> Q, K;
 
+	std::vector<MFloatPoint> cubeNormals;
+
 };

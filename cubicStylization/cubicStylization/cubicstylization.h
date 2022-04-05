@@ -5,6 +5,8 @@
 #include "utils.h"
 #include "Vertex.h"
 
+#include <chrono>
+
 #include <vector>
 
 // Main cubic stylization function

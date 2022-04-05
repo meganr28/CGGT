@@ -8,6 +8,11 @@ using namespace Eigen;
 class Vertex
 {
 public:
+    Vertex()
+        : id(0), position(),
+        Ek(), Ek_p(), Ei(), W(),
+        tk(), nk(), lambda_a(), R(MatrixXd())
+    {}
     Vertex(int i_d, VectorXd& pos)
         : id(i_d), position(pos),
         Ek(), Ek_p(), Ei(), W(),

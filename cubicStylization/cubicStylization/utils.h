@@ -14,13 +14,14 @@
 #include <maya/MItMeshVertex.h>
 #include <maya/MGlobal.h>
 #include <list>
-
+#include <chrono>
 #include "globaldata.h"
 #include "Vertex.h"
 
 #include "igl/arap_rhs.h"
 #include "igl/cotmatrix.h"
 #include "igl/min_quad_with_fixed.h"
+#include "igl/parallel_for.h"
 
 // Pre-compute local step matrices and global step Q and K matrices
 void precompute(MFnMesh& selectedObject, MDagPath& node, std::vector<Vertex>& Vi, SparseMatrix<double>& Q, SparseMatrix<double>& K, MatrixXd& bc, VectorXi& b, igl::min_quad_with_fixed_data<double>& solver_data, double cubeness);

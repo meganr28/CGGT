@@ -2,8 +2,13 @@
 
 void local_step(std::vector<Vertex>& Vd, MatrixXd& Rall)
 {
-	int RallCounter = 0;
-	for (unsigned int i = 0; i < Vd.size(); ++i) {
+	//int RallCounter = 0;
+	igl::parallel_for(
+		Vd.size(),
+		[&Vd, &Rall](const int i)
+	{
+	
+	//for (unsigned int i = 0; i < Vd.size(); ++i) {
 
 		// creating first matrix containing E_k and n_k in the last column
 		MatrixXd Ek_nk = Vd[i].Ek;
@@ -69,20 +74,20 @@ void local_step(std::vector<Vertex>& Vd, MatrixXd& Rall)
 		/*std::stringstream ssassdsd2;
 		ssassdsd2 << Vd[i].R;
 		MGlobal::displayInfo(("Vd[i].R: \n" + ssassdsd2.str()).c_str());*/
-		
-		Rall(RallCounter, 0) = Vd[i].R(0, 0);
-		Rall(RallCounter, 1) = Vd[i].R(0, 1);
-		Rall(RallCounter, 2) = Vd[i].R(0, 2);
-		RallCounter++;
-		Rall(RallCounter, 0) = Vd[i].R(1, 0);
-		Rall(RallCounter, 1) = Vd[i].R(1, 1);
-		Rall(RallCounter, 2) = Vd[i].R(1, 2);
-		RallCounter++;
-		Rall(RallCounter, 0) = Vd[i].R(2, 0);
-		Rall(RallCounter, 1) = Vd[i].R(2, 1);
-		Rall(RallCounter, 2) = Vd[i].R(2, 2);
-		RallCounter++;
-	}
+		int RallIndex = i * 3;
+		Rall(RallIndex, 0) = Vd[i].R(0, 0);
+		Rall(RallIndex, 1) = Vd[i].R(0, 1);
+		Rall(RallIndex, 2) = Vd[i].R(0, 2);
+		RallIndex++;
+		Rall(RallIndex, 0) = Vd[i].R(1, 0);
+		Rall(RallIndex, 1) = Vd[i].R(1, 1);
+		Rall(RallIndex, 2) = Vd[i].R(1, 2);
+		RallIndex++;
+		Rall(RallIndex, 0) = Vd[i].R(2, 0);
+		Rall(RallIndex, 1) = Vd[i].R(2, 1);
+		Rall(RallIndex, 2) = Vd[i].R(2, 2);
+	//}
+	}, 500);
 	//std::stringstream ss;
 	//ss << Rall;
 	//MGlobal::displayInfo(("Rall: \n" + ss.str()).c_str());
