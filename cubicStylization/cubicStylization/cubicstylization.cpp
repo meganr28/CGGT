@@ -1,6 +1,6 @@
 #include "cubicstylization.h"
 
-void cubicStylization(std::vector<Vertex>& Vi, float cubeness)
+void cubicStylization(std::vector<Vertex>& Vi, float cubeness, float iterations, float reduction)
 {
 	// get selected mesh
 	MDagPath node;
@@ -16,10 +16,17 @@ void cubicStylization(std::vector<Vertex>& Vi, float cubeness)
 	nodeFn.setObject(node);
 	MGlobal::displayInfo(nodeFn.name().asChar());
 	MFnMesh selectedObject(node);
+	/*if (reduction >= 0.1) {
+		MGlobal::executeCommand("select -r " + nodeFn.name() + " ;");
+	}*/
+	MGlobal::executeCommand("polyTriangulate -ch 1 " + nodeFn.name() + ";");
+	MGlobal::executeCommand("select -r " + nodeFn.name() + " ;");
+	MGlobal::executeCommand("xform -cp;");
+	MGlobal::executeCommand("makeIdentity -apply true -t 1 -r 1 -s 1 -n 0 -pn 1;");
 
 	// Initialize global data
 	globalData stylizationData(node);
-	
+
 	// Precomputation
 	auto t1 = std::chrono::high_resolution_clock::now();
 	precompute(Vi, stylizationData, cubeness);
@@ -44,7 +51,7 @@ void cubicStylization(std::vector<Vertex>& Vi, float cubeness)
 	MatrixXd Rall(Vi.size() * 3, 3);
 	std::vector<Vertex>& Vd = Vi;
 
-	int maxIterations = 1;
+	int maxIterations = iterations;
 	for (int iter = 0; iter < maxIterations; ++iter) {
 		// Set current vertex positions to last deformed vertex positions
 		for (unsigned int i = 0; i < Vi.size(); ++i) {
@@ -72,4 +79,6 @@ void cubicStylization(std::vector<Vertex>& Vi, float cubeness)
 	auto t3 = std::chrono::high_resolution_clock::now();
 	auto ms_int2 = std::chrono::duration_cast<std::chrono::milliseconds>(t3 - t1);
 	MGlobal::displayInfo(("Finished cubic stylization - time (ms): " + std::to_string(ms_int2.count()) + " \n").c_str());
+	MGlobal::executeCommand("xform -cp;");
+	MGlobal::executeCommand("makeIdentity -apply true -t 1 -r 1 -s 1 -n 0 -pn 1;");
 }
