@@ -19,6 +19,29 @@ void cubicStylization(std::vector<Vertex>& Vi, float cubeness, float iterations,
 	/*if (reduction >= 0.1) {
 		MGlobal::executeCommand("select -r " + nodeFn.name() + " ;");
 	}*/
+
+	// Get transformation matrix
+	MString transformMatCmd = "xform -q -ws -m";
+	MDoubleArray transformMatListDouble;
+	MGlobal::executeCommand(transformMatCmd, transformMatListDouble);
+
+	//float transformMatList[4][4];
+	MatrixXd transformMatData(4, 4);
+	int tMatIndex = 0;
+	for (int ti = 0; ti < 4; ++ti) {
+		for (int tj = 0; tj < 4; ++tj) {
+			//transformMatList[ti][tj] = transformMatListDouble[tMatIndex];
+			transformMatData(tj, ti) = transformMatListDouble[tMatIndex];
+			tMatIndex++;
+		}
+	}
+
+	//MMatrix transformMat(transformMatList);
+	//std::stringstream ss;
+	//ss << transformMatData;
+	//MGlobal::displayInfo(("Transformation Matrix: \n" + ss.str()).c_str());
+
+	// Triangulate and freeze transformations
 	MGlobal::executeCommand("polyTriangulate -ch 1 " + nodeFn.name() + ";");
 	MGlobal::executeCommand("select -r " + nodeFn.name() + " ;");
 	MGlobal::executeCommand("xform -cp;");
@@ -26,6 +49,10 @@ void cubicStylization(std::vector<Vertex>& Vi, float cubeness, float iterations,
 
 	// Initialize global data
 	globalData stylizationData(node);
+
+	// Set transformation matrix
+	//stylizationData.transformMat.resize(4, 4);
+	stylizationData.transformMat = transformMatData;
 
 	// Precomputation
 	auto t1 = std::chrono::high_resolution_clock::now();

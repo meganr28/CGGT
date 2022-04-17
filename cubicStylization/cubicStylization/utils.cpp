@@ -46,6 +46,13 @@ void precompute(std::vector<Vertex>& Vi, globalData& data, double cubeness) {
 	data.cubeNormals = { MFloatPoint(1, 0, 0), MFloatPoint(-1, 0, 0),
 											 MFloatPoint(0, 1, 0), MFloatPoint(0, -1, 0),
 											 MFloatPoint(0, 0, 1), MFloatPoint(0, 0, -1) };
+	for (int cn = 0; cn < 6; ++cn) {
+		VectorXd normalVec(4);
+		normalVec << data.cubeNormals[cn][0], data.cubeNormals[cn][1], data.cubeNormals[cn][2], 0.f;
+		VectorXd transformVec = data.transformMat * normalVec;
+		transformVec.normalize();
+		data.cubeNormals[cn] = MFloatPoint(transformVec[0], transformVec[1], transformVec[2]);
+	}
 
 	igl::parallel_for(
 		vertPositionsList.length(),

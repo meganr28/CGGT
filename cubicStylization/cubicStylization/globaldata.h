@@ -23,6 +23,9 @@ struct globalData {
 	MDagPath node;
 	MFnMesh selectedObject;
 
+	// Transformation matrix
+	MatrixXd transformMat;
+
 	// Pinned vertex
 	MatrixXd pinnedVertexPosition;
 	VectorXi pinnedVertexIndex;

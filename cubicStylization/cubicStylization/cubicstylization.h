@@ -5,8 +5,10 @@
 #include "utils.h"
 #include "Vertex.h"
 
-#include <chrono>
+#include "maya/MMatrix.h"
 
+#include <chrono>
+#include <stdio.h>
 #include <vector>
 
 // Main cubic stylization function
