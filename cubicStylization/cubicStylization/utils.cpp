@@ -1,6 +1,7 @@
 #include "utils.h"
 
-void precompute(std::vector<Vertex>& Vi, globalData& data, double cubeness) {
+void precompute(std::vector<Vertex>& Vi, globalData& data, double cubeness, bool randomCubeness, double random_min, double random_max, double cubenessX, double cubenessY, double cubenessZ) {
+	
 	// Get vertex positions as an array of points
 	MFloatPointArray vertPositionsList;
 	data.selectedObject.getPoints(vertPositionsList, MSpace::kWorld);
@@ -56,8 +57,15 @@ void precompute(std::vector<Vertex>& Vi, globalData& data, double cubeness) {
 
 	igl::parallel_for(
 		vertPositionsList.length(),
-		[&Vi, &vertPositionsList, &vertPositions, &data, cubeness](const int i)
+		[&Vi, &vertPositionsList, &vertPositions, &data, cubeness, randomCubeness, random_min, random_max, cubenessX, cubenessY, cubenessZ](const int i)
 	{
+
+		
+
+
+		std::default_random_engine generator;
+		generator.seed(i);
+		std::uniform_real_distribution<double> distribution(random_min, random_max);
 		MIntArray connected_faces_unsorted;
 		MItMeshVertex vertexIter(data.node);
 		int lastIndex;
@@ -78,7 +86,7 @@ void precompute(std::vector<Vertex>& Vi, globalData& data, double cubeness) {
 		MIntArray connected_faces = connected_faces_unsorted;
 		for (int qi = 0; qi < facesToSort.size(); ++qi) {
 			connected_faces[qi] = facesToSort[qi];
-		}		
+		}
 		getNeighborFaceEdgesAndWeights(connected_faces, data, v);
 
 		// Get vertex normal
@@ -88,9 +96,7 @@ void precompute(std::vector<Vertex>& Vi, globalData& data, double cubeness) {
 		vertexNormal << vertNormal[0], vertNormal[1], vertNormal[2];
 		v.nk = vertexNormal;
 
-		// Get lambda * area
-		VectorXd areaDiagonal = data.areaMatrix.diagonal();
-		v.lambda_a = cubeness * areaDiagonal(i);
+		
 
 		// Get target (snapped) normal
 		MFloatPoint snapNormal;
@@ -99,6 +105,19 @@ void precompute(std::vector<Vertex>& Vi, globalData& data, double cubeness) {
 		snappedNormal << snapNormal[0], snapNormal[1], snapNormal[2];
 		v.tk = snappedNormal;
 		
+		// Get lambda * area
+		VectorXd areaDiagonal = data.areaMatrix.diagonal();
+		if (randomCubeness) {
+			double newCubeness = distribution(generator);
+			v.lambda_a = newCubeness * areaDiagonal(i);
+		}
+		else {
+			double newCubeness = cubenessX * std::abs(v.tk[0]) + cubenessY * std::abs(v.tk[1]) + cubenessZ * std::abs(v.tk[2]);
+			v.lambda_a = newCubeness * areaDiagonal(i);
+			//v.lambda_a = cubeness * areaDiagonal(i);
+		}
+
+
 		// Make Vertex object and store in Vertex array
 		v.Ek_p = v.Ek;
 		Vi[i] = v;

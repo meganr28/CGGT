@@ -17,6 +17,7 @@
 #include <chrono>
 #include "globaldata.h"
 #include "Vertex.h"
+#include <random>
 
 #include "igl/arap_rhs.h"
 #include "igl/cotmatrix.h"
@@ -24,7 +25,7 @@
 #include "igl/parallel_for.h"
 
 // Pre-compute local step matrices and global step Q and K matrices
-void precompute(std::vector<Vertex>& Vi, globalData& data, double cubeness);
+void precompute(std::vector<Vertex>& Vi, globalData& data, double cubeness, bool randomCubeness, double random_min, double random_max, double cubenessX, double cubenessY, double cubenessZ);
 
 // Get neigbhoring edges and weights for each edge for one vertex
 void getNeighborFaceEdgesAndWeights(const MIntArray& connected_faceIDs, globalData& data, Vertex& vert);

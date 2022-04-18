@@ -1,6 +1,6 @@
 #include "cubicstylization.h"
 
-void cubicStylization(std::vector<Vertex>& Vi, float cubeness, float iterations, float reduction)
+void cubicStylization(std::vector<Vertex>& Vi, float cubeness, float iterations, float reduction, MString &reference_frame, double cubenessX, double cubenessY, double cubenessZ)
 {
 	// get selected mesh
 	MDagPath node;
@@ -25,21 +25,19 @@ void cubicStylization(std::vector<Vertex>& Vi, float cubeness, float iterations,
 	MDoubleArray transformMatListDouble;
 	MGlobal::executeCommand(transformMatCmd, transformMatListDouble);
 
-	//float transformMatList[4][4];
-	MatrixXd transformMatData(4, 4);
-	int tMatIndex = 0;
-	for (int ti = 0; ti < 4; ++ti) {
-		for (int tj = 0; tj < 4; ++tj) {
-			//transformMatList[ti][tj] = transformMatListDouble[tMatIndex];
-			transformMatData(tj, ti) = transformMatListDouble[tMatIndex];
-			tMatIndex++;
+	MatrixXd transformMatData = MatrixXd::Identity(4,4);
+	if (reference_frame == "Local") {
+		int tMatIndex = 0;
+		for (int ti = 0; ti < 4; ++ti) {
+			for (int tj = 0; tj < 4; ++tj) {
+				transformMatData(tj, ti) = transformMatListDouble[tMatIndex];
+				tMatIndex++;
+			}
 		}
 	}
-
-	//MMatrix transformMat(transformMatList);
-	//std::stringstream ss;
-	//ss << transformMatData;
-	//MGlobal::displayInfo(("Transformation Matrix: \n" + ss.str()).c_str());
+	std::stringstream s1s;
+	s1s << transformMatData;
+	MGlobal::displayInfo(("ReferenceFrameTransform: \n" + s1s.str()).c_str());
 
 	// Triangulate and freeze transformations
 	MGlobal::executeCommand("polyTriangulate -ch 1 " + nodeFn.name() + ";");
@@ -56,7 +54,7 @@ void cubicStylization(std::vector<Vertex>& Vi, float cubeness, float iterations,
 
 	// Precomputation
 	auto t1 = std::chrono::high_resolution_clock::now();
-	precompute(Vi, stylizationData, cubeness);
+	precompute(Vi, stylizationData, cubeness, false, 0.01, 3.0, cubenessX, cubenessY, cubenessZ);
 	auto t2 = std::chrono::high_resolution_clock::now();
 	auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
 	MGlobal::displayInfo(("Finished precomputation - time (ms): " + std::to_string(ms_int.count()) + " \n").c_str());
@@ -97,6 +95,7 @@ void cubicStylization(std::vector<Vertex>& Vi, float cubeness, float iterations,
 	// Update vertices to deformed vertices
 	MFloatPointArray deformedVertexPositions(Vd_positions.rows());
 	for (int n = 0; n < Vd_positions.rows(); ++n) {
+		//Vd_positions.row(n) = Vd_positions.row(n) + Vi[n].nk * 1.0;
 		deformedVertexPositions[n].x = Vd_positions(n, 0);
 		deformedVertexPositions[n].y = Vd_positions(n, 1);
 		deformedVertexPositions[n].z = Vd_positions(n, 2);
