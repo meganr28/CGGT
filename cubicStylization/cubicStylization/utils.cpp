@@ -1,6 +1,6 @@
 #include "utils.h"
 
-void precompute(std::vector<Vertex>& Vi, globalData& data, double cubeness, bool randomCubeness, double random_min, double random_max, double cubenessX, double cubenessY, double cubenessZ) {
+void precompute(std::vector<Vertex>& Vi, globalData& data, double cubeness, bool randomCubeness, double random_min, double random_max, double cubenessX, double cubenessY, double cubenessZ, MString& targetOBJFilename) {
 	
 	// Get vertex positions as an array of points
 	MFloatPointArray vertPositionsList;
@@ -44,10 +44,19 @@ void precompute(std::vector<Vertex>& Vi, globalData& data, double cubeness, bool
 	igl::cotmatrix_entries(vertPositions, facePositions, data.cotanW);
 
 	// Cube normals
-	data.cubeNormals = { MFloatPoint(1, 0, 0), MFloatPoint(-1, 0, 0),
+	std::string filename = targetOBJFilename.asChar();
+	std::vector<MFloatPoint> faceNormals;
+	loadOBJ(filename, faceNormals);
+
+	for (int fn = 0; fn < faceNormals.size(); ++fn) {
+		MGlobal::displayInfo(("Face normal: \n" + std::to_string(faceNormals[fn][0]) + " " + std::to_string(faceNormals[fn][1]) + " " + std::to_string(faceNormals[fn][2])).c_str());
+	}
+
+	/*data.cubeNormals = {MFloatPoint(1, 0, 0), MFloatPoint(-1, 0, 0),
 											 MFloatPoint(0, 1, 0), MFloatPoint(0, -1, 0),
-											 MFloatPoint(0, 0, 1), MFloatPoint(0, 0, -1) };
-	for (int cn = 0; cn < 6; ++cn) {
+											 MFloatPoint(0, 0, 1), MFloatPoint(0, 0, -1) };*/
+	data.cubeNormals = faceNormals;
+	for (int cn = 0; cn < faceNormals.size(); ++cn) {
 		VectorXd normalVec(4);
 		normalVec << data.cubeNormals[cn][0], data.cubeNormals[cn][1], data.cubeNormals[cn][2], 0.f;
 		VectorXd transformVec = data.transformMat * normalVec;
@@ -59,10 +68,6 @@ void precompute(std::vector<Vertex>& Vi, globalData& data, double cubeness, bool
 		vertPositionsList.length(),
 		[&Vi, &vertPositionsList, &vertPositions, &data, cubeness, randomCubeness, random_min, random_max, cubenessX, cubenessY, cubenessZ](const int i)
 	{
-
-		
-
-
 		std::default_random_engine generator;
 		generator.seed(i);
 		std::uniform_real_distribution<double> distribution(random_min, random_max);

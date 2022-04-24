@@ -18,6 +18,7 @@ const char* referenceFrameFlag = "-f", * referenceFrameLongFlag = "-referenceFra
 const char* cubenessXFlag = "-cx", * cubenessXLongFlag = "-cubenessX";
 const char* cubenessYFlag = "-cy", * cubenessYLongFlag = "-cubenessY";
 const char* cubenessZFlag = "-cz", * cubenessZLongFlag = "-cubenessZ";
+const char* targetOBJFlag = "-to", * targetOBJLongFlag = "-targetOBJ";
 
 MSyntax CGGTCmd::newSyntax()
 {
@@ -29,6 +30,7 @@ MSyntax CGGTCmd::newSyntax()
 	syntax.addFlag(cubenessXFlag, cubenessXLongFlag, MSyntax::kString);
 	syntax.addFlag(cubenessYFlag, cubenessYLongFlag, MSyntax::kString);
 	syntax.addFlag(cubenessZFlag, cubenessZLongFlag, MSyntax::kString);
+	syntax.addFlag(targetOBJFlag, targetOBJLongFlag, MSyntax::kString);
 	return syntax;
 }
 
@@ -45,6 +47,7 @@ MStatus CGGTCmd::doIt(const MArgList& args)
 	MString cubenessXArg = "";
 	MString cubenessYArg = "";
 	MString cubenessZArg = "";
+	MString targetOBJArg = "";
 	MArgDatabase argData(syntax(), args);
 
 	// Check for command line argument
@@ -96,9 +99,16 @@ MStatus CGGTCmd::doIt(const MArgList& args)
 	}
 	double cubenessZ = cubenessZArg.asDouble();
 
+	// Check for command line argument
+	if (argData.isFlagSet(targetOBJFlag)) {
+		argData.getFlagArgument(targetOBJFlag, 0, targetOBJArg);
+		MGlobal::displayInfo("Target .obj filename: " + targetOBJArg);
+	}
+	MString targetOBJFilename = targetOBJArg.asChar();
+
 	// Call cubic stylization function
 	std::vector<Vertex> V;
-	cubicStylization(V, cubeness, iterations, reduction, reference_frame, cubenessX, cubenessY, cubenessZ);
+	cubicStylization(V, cubeness, iterations, reduction, reference_frame, cubenessX, cubenessY, cubenessZ, targetOBJFilename);
 
 	return MStatus::kSuccess;
 }

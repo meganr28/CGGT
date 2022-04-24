@@ -117,7 +117,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NT_PLUGIN; _CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Program Files\Autodesk\Maya2022\include;C:\Users\missyGL\Documents\atool\cggt\cubicStylization\include\eigen-3.4.0;C:\Users\missyGL\Documents\atool\cggt\cubicStylization\include\libigl-main\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\Autodesk\Maya2022\include;C:\Users\megan\Documents\school\spring22\cis660\atool\CGGT\cubicStylization\include\eigen-3.4.0;C:\Users\megan\Documents\school\spring22\cis660\atool\CGGT\cubicStylization\include\libigl-main\include</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <Optimization>MaxSpeed</Optimization>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
@@ -154,6 +154,7 @@
     <ClCompile Include="cubicstylization.cpp" />
     <ClCompile Include="globalstep.cpp" />
     <ClCompile Include="localstep.cpp" />
+    <ClCompile Include="objloader.cpp" />
     <ClCompile Include="PluginMain.cpp" />
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="Vertex.cpp" />
@@ -165,6 +166,7 @@
     <ClInclude Include="globaldata.h" />
     <ClInclude Include="globalstep.h" />
     <ClInclude Include="localstep.h" />
+    <ClInclude Include="objloader.h" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
