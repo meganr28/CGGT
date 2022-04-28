@@ -13,6 +13,7 @@
 #include <maya/MFloatPointArray.h>
 #include <maya/MItMeshVertex.h>
 #include <maya/MGlobal.h>
+#include <maya/MImage.h>
 #include <list>
 #include <chrono>
 #include <random>
