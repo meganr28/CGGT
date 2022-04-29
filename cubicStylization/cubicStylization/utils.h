@@ -18,6 +18,7 @@
 #include <chrono>
 #include <random>
 
+#include "args.h"
 #include "globaldata.h"
 #include "Vertex.h"
 #include "objloader.h"
@@ -27,8 +28,13 @@
 #include "igl/min_quad_with_fixed.h"
 #include "igl/parallel_for.h"
 
+#include "CImg.h"
+#define cimg_use_png
+using namespace cimg_library;
+
 // Pre-compute local step matrices and global step Q and K matrices
-void precompute(std::vector<Vertex>& Vi, globalData& data, double cubeness, bool randomCubeness, double random_min, double random_max, double cubenessX, double cubenessY, double cubenessZ, MString& targetOBJFilename);
+//void precompute(std::vector<Vertex>& Vi, globalData& data, double cubeness, bool randomCubeness, double random_min, double random_max, double cubenessX, double cubenessY, double cubenessZ, MString& targetOBJFilename);
+void precompute(std::vector<Vertex>& Vi, globalData& data, commandArgs &args);
 
 // Get neigbhoring edges and weights for each edge for one vertex
 void getNeighborFaceEdgesAndWeights(const MIntArray& connected_faceIDs, globalData& data, Vertex& vert);

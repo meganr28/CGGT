@@ -12,6 +12,8 @@
 #include <maya/MSelectionList.h>
 #include <maya/MFloatPointArray.h>
 #include <maya/MItMeshVertex.h>
+
+#include "args.h"
 #include "Vertex.h"
 #include "cubicstylization.h"
 #include "utils.h"

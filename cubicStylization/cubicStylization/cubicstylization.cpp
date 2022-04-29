@@ -1,6 +1,7 @@
 #include "cubicstylization.h"
 
-void cubicStylization(std::vector<Vertex>& Vi, float cubeness, float iterations, float reduction, MString &reference_frame, double cubenessX, double cubenessY, double cubenessZ, MString& targetOBJFilename)
+//void cubicStylization(std::vector<Vertex>& Vi, float cubeness, float iterations, float reduction, MString &reference_frame, double cubenessX, double cubenessY, double cubenessZ, MString& targetOBJFilename, commandArgs& args)
+void cubicStylization(std::vector<Vertex>& Vi, commandArgs& args)
 {
 	// get selected mesh
 	MDagPath node;
@@ -26,7 +27,7 @@ void cubicStylization(std::vector<Vertex>& Vi, float cubeness, float iterations,
 	MGlobal::executeCommand(transformMatCmd, transformMatListDouble);
 
 	MatrixXd transformMatData = MatrixXd::Identity(4,4);
-	if (reference_frame == "Local") {
+	if (args.referenceFrame == "Local") {
 		int tMatIndex = 0;
 		for (int ti = 0; ti < 4; ++ti) {
 			for (int tj = 0; tj < 4; ++tj) {
@@ -54,7 +55,8 @@ void cubicStylization(std::vector<Vertex>& Vi, float cubeness, float iterations,
 
 	// Precomputation
 	auto t1 = std::chrono::high_resolution_clock::now();
-	precompute(Vi, stylizationData, cubeness, false, 0.01, 3.0, cubenessX, cubenessY, cubenessZ, targetOBJFilename);
+	//precompute(Vi, stylizationData, args.cubeness, args.randomCubeness, args.randomMin, args.randomMax, args.cubenessX, args.cubenessY, args.cubenessZ, args.targetObj);
+	precompute(Vi, stylizationData, args);
 	auto t2 = std::chrono::high_resolution_clock::now();
 	auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
 	MGlobal::displayInfo(("Finished precomputation - time (ms): " + std::to_string(ms_int.count()) + " \n").c_str());
@@ -76,7 +78,7 @@ void cubicStylization(std::vector<Vertex>& Vi, float cubeness, float iterations,
 	MatrixXd Rall(Vi.size() * 3, 3);
 	std::vector<Vertex>& Vd = Vi;
 
-	int maxIterations = iterations;
+	int maxIterations = args.iterations;
 	for (int iter = 0; iter < maxIterations; ++iter) {
 		// Set current vertex positions to last deformed vertex positions
 		for (unsigned int i = 0; i < Vi.size(); ++i) {
