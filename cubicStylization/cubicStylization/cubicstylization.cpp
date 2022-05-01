@@ -1,6 +1,5 @@
 #include "cubicstylization.h"
 
-//void cubicStylization(std::vector<Vertex>& Vi, float cubeness, float iterations, float reduction, MString &reference_frame, double cubenessX, double cubenessY, double cubenessZ, MString& targetOBJFilename, commandArgs& args)
 void cubicStylization(std::vector<Vertex>& Vi, commandArgs& args)
 {
 	// get selected mesh
@@ -40,8 +39,9 @@ void cubicStylization(std::vector<Vertex>& Vi, commandArgs& args)
 	s1s << transformMatData;
 	MGlobal::displayInfo(("ReferenceFrameTransform: \n" + s1s.str()).c_str());
 
-	// Triangulate and freeze transformations
+	// Triangulate, reduce, and freeze transformations
 	MGlobal::executeCommand("polyTriangulate -ch 1 " + nodeFn.name() + ";");
+	MGlobal::executeCommand(("polyReduce  -ver 1 -trm 0 -shp 0 -keepBorder 1 -keepMapBorder 1 -keepColorBorder 1 -keepFaceGroupBorder 1 -keepHardEdge 1 -keepCreaseEdge 1 -keepBorderWeight 0.5 -keepMapBorderWeight 0.5 -keepColorBorderWeight 0.5 -keepFaceGroupBorderWeight 0.5 -keepHardEdgeWeight 0.5 -keepCreaseEdgeWeight 0.5 -useVirtualSymmetry 0 -symmetryTolerance 0.01 -sx 0 -sy 1 -sz 0 -sw 0 -preserveTopology 1 -keepQuadsWeight 1 -vertexMapName \"\" -cachingReduce 1 -ch 1 -p " + std::to_string(args.reductionPercent) + " -vct 0 -tct 3000 -replaceOriginal 1 \"|" + nodeFn.name().asChar() + "\";").c_str());
 	MGlobal::executeCommand("select -r " + nodeFn.name() + " ;");
 	MGlobal::executeCommand("xform -cp;");
 	MGlobal::executeCommand("makeIdentity -apply true -t 1 -r 1 -s 1 -n 0 -pn 1;");
@@ -55,7 +55,6 @@ void cubicStylization(std::vector<Vertex>& Vi, commandArgs& args)
 
 	// Precomputation
 	auto t1 = std::chrono::high_resolution_clock::now();
-	//precompute(Vi, stylizationData, args.cubeness, args.randomCubeness, args.randomMin, args.randomMax, args.cubenessX, args.cubenessY, args.cubenessZ, args.targetObj);
 	precompute(Vi, stylizationData, args);
 	auto t2 = std::chrono::high_resolution_clock::now();
 	auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);

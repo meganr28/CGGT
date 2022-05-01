@@ -1,6 +1,5 @@
 #include "utils.h"
 
-//void precompute(std::vector<Vertex>& Vi, globalData& data, double cubeness, bool randomCubeness, double random_min, double random_max, double cubenessX, double cubenessY, double cubenessZ, MString& targetOBJFilename) {
 void precompute(std::vector<Vertex>&Vi, globalData & data, commandArgs & args) {
 
 	// Get vertex positions as an array of points

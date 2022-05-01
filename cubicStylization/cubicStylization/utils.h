@@ -33,7 +33,6 @@
 using namespace cimg_library;
 
 // Pre-compute local step matrices and global step Q and K matrices
-//void precompute(std::vector<Vertex>& Vi, globalData& data, double cubeness, bool randomCubeness, double random_min, double random_max, double cubenessX, double cubenessY, double cubenessZ, MString& targetOBJFilename);
 void precompute(std::vector<Vertex>& Vi, globalData& data, commandArgs &args);
 
 // Get neigbhoring edges and weights for each edge for one vertex

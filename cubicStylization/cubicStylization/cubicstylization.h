@@ -14,5 +14,4 @@
 
 // Main cubic stylization function
 // Takes input vertices from the selected mesh and updates mesh with deformed vertices
-//void cubicStylization(std::vector<Vertex>& Vi, float cubeness, float iterations, float reduction, MString &reference_frame, double cubenessX, double cubenessY, double cubenessZ, MString &targetOBJFilename, commandArgs& args);
 void cubicStylization(std::vector<Vertex>& Vi, commandArgs &args);

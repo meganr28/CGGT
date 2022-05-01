@@ -109,7 +109,6 @@ MStatus CGGTCmd::doIt(const MArgList& args)
 
 	// Call cubic stylization function
 	std::vector<Vertex> V;
-	//cubicStylization(V, cubeness, iterations, reduction, reference_frame, cubenessX, cubenessY, cubenessZ, targetOBJFilename, cubicArgs);
 	cubicStylization(V, cubicArgs);
 
 	return MStatus::kSuccess;
