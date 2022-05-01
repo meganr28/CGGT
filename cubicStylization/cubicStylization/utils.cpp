@@ -71,7 +71,7 @@ void precompute(std::vector<Vertex>&Vi, globalData & data, commandArgs & args) {
 		data.cubeNormals[cn] = MFloatPoint(transformVec[0], transformVec[1], transformVec[2]);
 	}
 
-	CImg<float> gaussMapImg("C:/Users/megan/Documents/school/spring22/cis660/atool/CGGT/cubicStylization/images/gaussMapRed1.png");
+	CImg<float> gaussMapImg("C:/Users/missyGL/Documents/atool/cggt/cubicStylization/images/gaussmap2.png");
 	int gaussMapWidth = gaussMapImg.width();
 	int gaussMapHeight = gaussMapImg.height();
 

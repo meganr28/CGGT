@@ -25,26 +25,35 @@ void cubicStylization(std::vector<Vertex>& Vi, commandArgs& args)
 	MDoubleArray transformMatListDouble;
 	MGlobal::executeCommand(transformMatCmd, transformMatListDouble);
 
+	std::ofstream localAxesAngles;
+	localAxesAngles.open("C:/Users/missyGL/Documents/atool/cggt/cubicStylization/data/localAxes.txt");
 	MatrixXd transformMatData = MatrixXd::Identity(4,4);
 	if (args.referenceFrame == "Local") {
 		int tMatIndex = 0;
 		for (int ti = 0; ti < 4; ++ti) {
 			for (int tj = 0; tj < 4; ++tj) {
 				transformMatData(tj, ti) = transformMatListDouble[tMatIndex];
+				localAxesAngles << transformMatListDouble[tMatIndex] << " ";
 				tMatIndex++;
 			}
 		}
 	}
+	localAxesAngles.close();
 	std::stringstream s1s;
 	s1s << transformMatData;
 	MGlobal::displayInfo(("ReferenceFrameTransform: \n" + s1s.str()).c_str());
 
 	// Triangulate, reduce, and freeze transformations
 	MGlobal::executeCommand("polyTriangulate -ch 1 " + nodeFn.name() + ";");
-	MGlobal::executeCommand(("polyReduce  -ver 1 -trm 0 -shp 0 -keepBorder 1 -keepMapBorder 1 -keepColorBorder 1 -keepFaceGroupBorder 1 -keepHardEdge 1 -keepCreaseEdge 1 -keepBorderWeight 0.5 -keepMapBorderWeight 0.5 -keepColorBorderWeight 0.5 -keepFaceGroupBorderWeight 0.5 -keepHardEdgeWeight 0.5 -keepCreaseEdgeWeight 0.5 -useVirtualSymmetry 0 -symmetryTolerance 0.01 -sx 0 -sy 1 -sz 0 -sw 0 -preserveTopology 1 -keepQuadsWeight 1 -vertexMapName \"\" -cachingReduce 1 -ch 1 -p " + std::to_string(args.reductionPercent) + " -vct 0 -tct 3000 -replaceOriginal 1 \"|" + nodeFn.name().asChar() + "\";").c_str());
+	if (args.reductionPercent > 0.1) {
+		MGlobal::executeCommand(("polyReduce  -ver 1 -trm 0 -shp 0 -keepBorder 1 -keepMapBorder 1 -keepColorBorder 1 -keepFaceGroupBorder 1 -keepHardEdge 1 -keepCreaseEdge 1 -keepBorderWeight 0.5 -keepMapBorderWeight 0.5 -keepColorBorderWeight 0.5 -keepFaceGroupBorderWeight 0.5 -keepHardEdgeWeight 0.5 -keepCreaseEdgeWeight 0.5 -useVirtualSymmetry 0 -symmetryTolerance 0.01 -sx 0 -sy 1 -sz 0 -sw 0 -preserveTopology 1 -keepQuadsWeight 1 -vertexMapName \"\" -cachingReduce 1 -ch 1 -p " + std::to_string(args.reductionPercent) + " -vct 0 -tct 3000 -replaceOriginal 1 \"|" + nodeFn.name().asChar() + "\";").c_str());
+	}
 	MGlobal::executeCommand("select -r " + nodeFn.name() + " ;");
 	MGlobal::executeCommand("xform -cp;");
 	MGlobal::executeCommand("makeIdentity -apply true -t 1 -r 1 -s 1 -n 0 -pn 1;");
+
+	
+
 
 	// Initialize global data
 	globalData stylizationData(node);
