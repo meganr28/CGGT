@@ -71,27 +71,29 @@ void precompute(std::vector<Vertex>&Vi, globalData & data, commandArgs & args) {
 		data.cubeNormals[cn] = MFloatPoint(transformVec[0], transformVec[1], transformVec[2]);
 	}
 
-	CImg<float> gaussMapImg("C:/Users/missyGL/Documents/atool/cggt/cubicStylization/images/gaussmap2.png");
-	int gaussMapWidth = gaussMapImg.width();
-	int gaussMapHeight = gaussMapImg.height();
-
 	std::vector<float> gaussMapVals;
 	gaussMapVals.resize(vertPositionsList.length());
-	for (int vi = 0; vi < vertPositionsList.length(); ++vi) {
-		// Get vertex normal
-		MVector vertNormal;
-		data.selectedObject.getVertexNormal(vi, false, vertNormal, MSpace::kWorld);
-		VectorXd vertexNormal(3);
-		vertexNormal << vertNormal[0], vertNormal[1], vertNormal[2];
+	if (args.useGaussMap) {
+		CImg<float> gaussMapImg(args.gaussMap.asChar());
+		int gaussMapWidth = gaussMapImg.width();
+		int gaussMapHeight = gaussMapImg.height();
 
-		int gaussMapU = ((0.5f * vertexNormal[0]) + 0.5f) * gaussMapWidth;
-		int gaussMapV = ((0.5f * vertexNormal[1]) + 0.5f) * gaussMapHeight;
-		//MGlobal::displayInfo(("pixel u " + std::to_string(vi) + ": " + std::to_string(gaussMapU)).c_str());
-		//MGlobal::displayInfo(("pixel v " + std::to_string(vi) + ": " + std::to_string(gaussMapV)).c_str());
+		for (int vi = 0; vi < vertPositionsList.length(); ++vi) {
+			// Get vertex normal
+			MVector vertNormal;
+			data.selectedObject.getVertexNormal(vi, false, vertNormal, MSpace::kWorld);
+			VectorXd vertexNormal(3);
+			vertexNormal << vertNormal[0], vertNormal[1], vertNormal[2];
 
-		float r_value = gaussMapImg(gaussMapU, gaussMapV, 0, 0);
-		//MGlobal::displayInfo(("pixel red component" + std::to_string(vi) + ": " + std::to_string(r_value)).c_str());
-		gaussMapVals[vi] = r_value;
+			int gaussMapU = ((0.5f * vertexNormal[0]) + 0.5f) * gaussMapWidth;
+			int gaussMapV = ((0.5f * vertexNormal[1]) + 0.5f) * gaussMapHeight;
+			//MGlobal::displayInfo(("pixel u " + std::to_string(vi) + ": " + std::to_string(gaussMapU)).c_str());
+			//MGlobal::displayInfo(("pixel v " + std::to_string(vi) + ": " + std::to_string(gaussMapV)).c_str());
+
+			float r_value = gaussMapImg(gaussMapU, gaussMapV, 0, 0);
+			//MGlobal::displayInfo(("pixel red component" + std::to_string(vi) + ": " + std::to_string(r_value)).c_str());
+			gaussMapVals[vi] = r_value;
+		}
 	}
 
 	igl::parallel_for(
@@ -140,13 +142,18 @@ void precompute(std::vector<Vertex>&Vi, globalData & data, commandArgs & args) {
 		
 		// Get lambda * area
 		VectorXd areaDiagonal = data.areaMatrix.diagonal();
+		double newCubeness = args.cubeness;
 		if (args.randomCubeness) {
-			double newCubeness = distribution(generator);
+			newCubeness = distribution(generator);
 			v.lambda_a = newCubeness * areaDiagonal(i);
 		}
 		else {
-			double newCubeness = args.cubenessX * std::abs(v.tk[0]) + args.cubenessY * std::abs(v.tk[1]) + args.cubenessZ * std::abs(v.tk[2]);
-			newCubeness = (gaussMapVals[i] / 255.0f) * newCubeness;
+			if (args.usePerAxisVals) {
+				newCubeness = args.cubenessX * std::abs(v.tk[0]) + args.cubenessY * std::abs(v.tk[1]) + args.cubenessZ * std::abs(v.tk[2]);
+			}
+			else if (args.useGaussMap) {
+				newCubeness = (gaussMapVals[i] / 255.0f) * newCubeness;
+			}
 			v.lambda_a = newCubeness * areaDiagonal(i);
 		}
 

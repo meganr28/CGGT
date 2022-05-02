@@ -16,9 +16,6 @@ void cubicStylization(std::vector<Vertex>& Vi, commandArgs& args)
 	nodeFn.setObject(node);
 	MGlobal::displayInfo(nodeFn.name().asChar());
 	MFnMesh selectedObject(node);
-	/*if (reduction >= 0.1) {
-		MGlobal::executeCommand("select -r " + nodeFn.name() + " ;");
-	}*/
 
 	// Get transformation matrix
 	MString transformMatCmd = "xform -q -ws -m";
@@ -26,7 +23,7 @@ void cubicStylization(std::vector<Vertex>& Vi, commandArgs& args)
 	MGlobal::executeCommand(transformMatCmd, transformMatListDouble);
 
 	std::ofstream localAxesAngles;
-	localAxesAngles.open("C:/Users/missyGL/Documents/atool/cggt/cubicStylization/data/localAxes.txt");
+	localAxesAngles.open("C:/Users/megan/Documents/school/spring22/cis660/atool/CGGT/cubicStylization/data/localAxes.txt");
 	MatrixXd transformMatData = MatrixXd::Identity(4,4);
 	if (args.referenceFrame == "Local") {
 		int tMatIndex = 0;
@@ -51,9 +48,6 @@ void cubicStylization(std::vector<Vertex>& Vi, commandArgs& args)
 	MGlobal::executeCommand("select -r " + nodeFn.name() + " ;");
 	MGlobal::executeCommand("xform -cp;");
 	MGlobal::executeCommand("makeIdentity -apply true -t 1 -r 1 -s 1 -n 0 -pn 1;");
-
-	
-
 
 	// Initialize global data
 	globalData stylizationData(node);

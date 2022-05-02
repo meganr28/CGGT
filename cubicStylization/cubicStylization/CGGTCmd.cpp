@@ -18,6 +18,9 @@ const char* referenceFrameFlag = "-f", * referenceFrameLongFlag = "-referenceFra
 const char* cubenessXFlag = "-cx", * cubenessXLongFlag = "-cubenessX";
 const char* cubenessYFlag = "-cy", * cubenessYLongFlag = "-cubenessY";
 const char* cubenessZFlag = "-cz", * cubenessZLongFlag = "-cubenessZ";
+const char* useAxisFlag = "-ua", * useAxisLongFlag = "-useAxis";
+const char* useGaussFlag = "-ug", * useGaussLongFlag = "-useGauss";
+const char* gaussMapFlag = "-gm", * gaussMapLongFlag = "-gaussMap";
 const char* targetOBJFlag = "-to", * targetOBJLongFlag = "-targetOBJ";
 
 MSyntax CGGTCmd::newSyntax()
@@ -30,6 +33,9 @@ MSyntax CGGTCmd::newSyntax()
 	syntax.addFlag(cubenessXFlag, cubenessXLongFlag, MSyntax::kString);
 	syntax.addFlag(cubenessYFlag, cubenessYLongFlag, MSyntax::kString);
 	syntax.addFlag(cubenessZFlag, cubenessZLongFlag, MSyntax::kString);
+	syntax.addFlag(useAxisFlag, useAxisLongFlag, MSyntax::kString);
+	syntax.addFlag(useGaussFlag, useGaussLongFlag, MSyntax::kString);
+	syntax.addFlag(gaussMapFlag, gaussMapLongFlag, MSyntax::kString);
 	syntax.addFlag(targetOBJFlag, targetOBJLongFlag, MSyntax::kString);
 	return syntax;
 }
@@ -47,6 +53,9 @@ MStatus CGGTCmd::doIt(const MArgList& args)
 	MString cubenessXArg = "";
 	MString cubenessYArg = "";
 	MString cubenessZArg = "";
+	MString useAxisArg = "";
+	MString useGaussArg = "";
+	MString gaussMapArg = "";
 	MString targetOBJArg = "";
 	MArgDatabase argData(syntax(), args);
 
@@ -97,6 +106,26 @@ MStatus CGGTCmd::doIt(const MArgList& args)
 	}
 	double cubenessZ = cubenessZArg.asDouble();
 
+	// Check if using per-axis or per-vertex cubeness values
+	if (argData.isFlagSet(useAxisFlag)) {
+		argData.getFlagArgument(useAxisFlag, 0, useAxisArg);
+		MGlobal::displayInfo("Use Axis: " + useAxisArg);
+	}
+	int useAxis = useAxisArg.asInt();
+
+	if (argData.isFlagSet(useGaussFlag)) {
+		argData.getFlagArgument(useGaussFlag, 0, useGaussArg);
+		MGlobal::displayInfo("Use Gauss: " + useGaussArg);
+	}
+	int useGauss = useGaussArg.asInt();
+
+	// Check for gauss map argument
+	if (argData.isFlagSet(gaussMapFlag)) {
+		argData.getFlagArgument(gaussMapFlag, 0, gaussMapArg);
+		MGlobal::displayInfo("Gauss map filename: " + gaussMapArg);
+	}
+	MString gaussMapFilename = gaussMapArg.asChar();
+
 	// Check for target obj argument
 	if (argData.isFlagSet(targetOBJFlag)) {
 		argData.getFlagArgument(targetOBJFlag, 0, targetOBJArg);
@@ -105,7 +134,9 @@ MStatus CGGTCmd::doIt(const MArgList& args)
 	MString targetOBJFilename = targetOBJArg.asChar();
 
 	// Initialize command line argument struct
-	commandArgs cubicArgs(cubeness, cubenessX, cubenessY, cubenessZ, iterations, reduction, reference_frame, targetOBJFilename);
+	commandArgs cubicArgs(cubeness, cubenessX, cubenessY, cubenessZ, 
+						  useAxis, useGauss, iterations, reduction, 
+						  reference_frame, gaussMapFilename, targetOBJFilename);
 
 	// Call cubic stylization function
 	std::vector<Vertex> V;
