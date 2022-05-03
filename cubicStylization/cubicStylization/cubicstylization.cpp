@@ -17,6 +17,12 @@ void cubicStylization(std::vector<Vertex>& Vi, commandArgs& args)
 	MGlobal::displayInfo(nodeFn.name().asChar());
 	MFnMesh selectedObject(node);
 
+	// decide which file path to use
+	std::string resetPath = "C:/Users/megan/Documents/school/spring22/cis660/atool/CGGT/cubicStylization/data/resetVertPos.txt";
+	//std::string resetPath = "C:/Users/missyGL/Documents/atool/cggt/cubicStylization/data/resetVertPos.txt";
+
+	std::string axesPath = "C:/Users/megan/Documents/school/spring22/cis660/atool/CGGT/cubicStylization/data/localAxes.txt";
+	//std::string axesPath = "C:/Users/missyGL/Documents/atool/cggt/cubicStylization/data/localAxes.txt";
 
 	if (args.resetMesh == "reset") {
 		MFloatPointArray vertPositionsList;
@@ -24,7 +30,7 @@ void cubicStylization(std::vector<Vertex>& Vi, commandArgs& args)
 
 
 		std::ifstream resetVertPos;
-		resetVertPos.open("C:/Users/missyGL/Documents/atool/cggt/cubicStylization/data/resetVertPos.txt");
+		resetVertPos.open(resetPath);
 
 		std::string lineBuffer = "";
 		std::string tokenName = "";
@@ -60,7 +66,7 @@ void cubicStylization(std::vector<Vertex>& Vi, commandArgs& args)
 		// if global, write identity matrix to file
 
 		std::ofstream localAxesAngles;
-		localAxesAngles.open("C:/Users/missyGL/Documents/atool/cggt/cubicStylization/data/localAxes.txt");
+		localAxesAngles.open(axesPath);
 		int tMatIndex = 0;
 		localAxesAngles << nodeFn.name().asChar() << " ";
 		for (int ti = 0; ti < 4; ++ti) {
@@ -76,7 +82,7 @@ void cubicStylization(std::vector<Vertex>& Vi, commandArgs& args)
 	
 	if (args.referenceFrame == "Local") {
 		std::ifstream fileOpenCheck;
-		fileOpenCheck.open("C:/Users/missyGL/Documents/atool/cggt/cubicStylization/data/localAxes.txt");
+		fileOpenCheck.open(axesPath);
 		if (fileOpenCheck) {
 			// if local and file exists, try to read in the data there for our transformation matrix
 			std::string lineBuffer = "";
@@ -104,7 +110,7 @@ void cubicStylization(std::vector<Vertex>& Vi, commandArgs& args)
 			if (comparisonVal == 16 || !isSameObj) {
 				// if file matrix is transform or they are not describing the same object, rewrite
 				std::ofstream localAxesAngles;
-				localAxesAngles.open("C:/Users/missyGL/Documents/atool/cggt/cubicStylization/data/localAxes.txt");
+				localAxesAngles.open(axesPath);
 				int tMatIndex = 0;
 				localAxesAngles << nodeFn.name().asChar() << " ";
 				for (int ti = 0; ti < 4; ++ti) {
@@ -121,7 +127,7 @@ void cubicStylization(std::vector<Vertex>& Vi, commandArgs& args)
 			// if local and hasnt been created write orientation to file
 			fileOpenCheck.close();
 			std::ofstream localAxesAngles;
-			localAxesAngles.open("C:/Users/missyGL/Documents/atool/cggt/cubicStylization/data/localAxes.txt");
+			localAxesAngles.open(axesPath);
 			int tMatIndex = 0;
 			localAxesAngles << nodeFn.name().asChar() << " ";
 			for (int ti = 0; ti < 4; ++ti) {
@@ -167,7 +173,7 @@ void cubicStylization(std::vector<Vertex>& Vi, commandArgs& args)
 	MatrixXd Vd_positions(Vi.size(), 3);
 
 	std::ofstream resetVertPos;
-	resetVertPos.open("C:/Users/missyGL/Documents/atool/cggt/cubicStylization/data/resetVertPos.txt");
+	resetVertPos.open(resetPath);
 	for (int b = 0; b < Vi.size(); ++b) {
 		resetVertPos << Vi[b].position(0) << " " << Vi[b].position(1) << " " << Vi[b].position(2) << std::endl;
 	}

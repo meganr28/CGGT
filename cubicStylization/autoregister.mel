@@ -1,29 +1,29 @@
 global string $gMainWindow;
 menu -p $gMainWindow -label "Cubic Stylization";
 	menuItem -label "Offline Stylization" -command offlineStylization;
-	menuItem -label "Real-time Stylization" -command "createNode transform -n CGGT1; createNode mesh -n CGGTShape1 -p CGGT1; sets -add initialShadingGroup CGGTShape1; createNode CGGTNode -n CGGTNode1; connectAttr pCubeShape1.outMesh CGGTNode1.input_geometry; connectAttr CGGTNode1.output_geometry CGGTShape1.inMesh;";
+	//menuItem -label "Real-time Stylization" -command "createNode transform -n CGGT1; createNode mesh -n CGGTShape1 -p CGGT1; sets -add initialShadingGroup CGGTShape1; createNode CGGTNode -n CGGTNode1; connectAttr pCubeShape1.outMesh CGGTNode1.input_geometry; connectAttr CGGTNode1.output_geometry CGGTShape1.inMesh;";
 	
 global proc offlineStylization() 
 {
     if (`window -exists offlineWin`) 
         deleteUI offlineWin; 
     
-    window -title "Offline Cubic Stylization" -widthHeight 500 500 offlineWin;
+    window -title "Cubic Stylization" -widthHeight 500 500 offlineWin;
         columnLayout -columnAttach "both" 5 -rowSpacing 10 -columnWidth 500; 
             text -l "Tool Parameters" -align "left";
             
-            frameLayout -collapsable true -label "Overall Cubeness";
-            string $cubenessSlider = `floatSliderGrp -field true -minValue 0 -maxValue 10 -fieldMinValue 0 -fieldMaxValue 10 -precision 3 -label "Cubeness" cubenessSlider`;		
+            frameLayout -collapsable true -label "Overall Deformation Factor";
+            string $cubenessSlider = `floatSliderGrp -field true -minValue 0 -maxValue 10 -fieldMinValue 0 -fieldMaxValue 10 -precision 3 -label "Deformation Factor" cubenessSlider`;		
             textField objFilePath;
             button -label "Load Target Shape OBJ" -command loadOBJ; 
             
-            frameLayout -collapsable true -label "Per-Axis Cubeness";
-            string $cubenessXSlider = `floatSliderGrp -field true -minValue 0 -maxValue 10 -fieldMinValue 0 -fieldMaxValue 10 -precision 3 -label "Cubeness in X Axis" -enable 0 cubenessXSlider`; 
-            string $cubenessYSlider = `floatSliderGrp -field true -minValue 0 -maxValue 10 -fieldMinValue 0 -fieldMaxValue 10 -precision 3 -label "Cubeness in Y Axis" -enable 0 cubenessYSlider`; 
-            string $cubenessZSlider = `floatSliderGrp -field true -minValue 0 -maxValue 10 -fieldMinValue 0 -fieldMaxValue 10 -precision 3 -label "Cubeness in Z Axis" -enable 0 cubenessZSlider`;   
-            checkBox -label "Use Per-Axis Cubeness" -changeCommand toggleAxisSliderEnable perAxisCheck; 
+            frameLayout -collapsable true -label "Per-Axis Deformation Factor";
+            string $cubenessXSlider = `floatSliderGrp -field true -minValue 0 -maxValue 10 -fieldMinValue 0 -fieldMaxValue 10 -precision 3 -label "Deformation in X Axis" -enable 0 cubenessXSlider`; 
+            string $cubenessYSlider = `floatSliderGrp -field true -minValue 0 -maxValue 10 -fieldMinValue 0 -fieldMaxValue 10 -precision 3 -label "Deformation in Y Axis" -enable 0 cubenessYSlider`; 
+            string $cubenessZSlider = `floatSliderGrp -field true -minValue 0 -maxValue 10 -fieldMinValue 0 -fieldMaxValue 10 -precision 3 -label "Deformation in Z Axis" -enable 0 cubenessZSlider`;   
+            checkBox -label "Use Per-Axis Deformation Factor" -changeCommand toggleAxisSliderEnable perAxisCheck; 
             
-            frameLayout -collapsable true -label "Per-Vertex Cubeness";
+            frameLayout -collapsable true -label "Per-Vertex Deformation Factor";
 			//image -width 100 -height 100 -backgroundColor 0.0 0.0 0.0 gaussMapImg;
             textField gaussFilePath;      
             button -label "Load Gauss Map" -command loadGauss -enable 0 gaussButton; 
