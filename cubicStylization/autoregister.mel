@@ -36,7 +36,7 @@ global proc offlineStylization()
                  
 		rowColumnLayout -numberOfColumns 2 -columnWidth 1 250 -columnWidth 2 250;
 			button -label "Deform" -w 70 -h 30 -command cubicStylization; 
-			button -label "Reset Mesh" -w 70 -h 30 -command "";
+			button -label "Reset Mesh" -w 70 -h 30 -command resetMesh;
     showWindow offlineWin;
 }
 
@@ -107,6 +107,25 @@ global proc cubicStylization()
     string $useGaussVal = `checkBox -q -value perVertexCheck`;
 	string $gaussMap = `textField -q -text gaussFilePath`;
     string $targetOBJ = `textField -q -text objFilePath`;
+	string $rstMesh = "no";
     
-    CGGTCmd -c $cubeVal -it $itVal -r $redVal -f $frameVal -cx $cubeXVal -cy $cubeYVal -cz $cubeZVal -ua $useAxisVal -ug $useGaussVal -gm $gaussMap -to $targetOBJ;
+    CGGTCmd -c $cubeVal -it $itVal -r $redVal -f $frameVal -cx $cubeXVal -cy $cubeYVal -cz $cubeZVal -ua $useAxisVal -ug $useGaussVal -gm $gaussMap -to $targetOBJ -re $rstMesh;
+}
+
+global proc resetMesh()
+{
+    float $cubeVal = `floatSliderGrp -q -value cubenessSlider`;
+    int $itVal = `floatSliderGrp -q -value iterationsSlider`;
+    float $redVal = `floatSliderGrp -q -value reductionSlider`;
+    string $frameVal = `optionMenuGrp -q -value refframe`;
+    float $cubeXVal = `floatSliderGrp -q -value cubenessXSlider`;
+    float $cubeYVal = `floatSliderGrp -q -value cubenessYSlider`;
+    float $cubeZVal = `floatSliderGrp -q -value cubenessZSlider`;
+    string $useAxisVal = `checkBox -q -value perAxisCheck`;
+    string $useGaussVal = `checkBox -q -value perVertexCheck`;
+	string $gaussMap = `textField -q -text gaussFilePath`;
+    string $targetOBJ = `textField -q -text objFilePath`;
+	string $rstMesh = "reset";
+    
+    CGGTCmd -c $cubeVal -it $itVal -r $redVal -f $frameVal -cx $cubeXVal -cy $cubeYVal -cz $cubeZVal -ua $useAxisVal -ug $useGaussVal -gm $gaussMap -to $targetOBJ -re $rstMesh;
 }

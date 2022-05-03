@@ -22,6 +22,8 @@ const char* useAxisFlag = "-ua", * useAxisLongFlag = "-useAxis";
 const char* useGaussFlag = "-ug", * useGaussLongFlag = "-useGauss";
 const char* gaussMapFlag = "-gm", * gaussMapLongFlag = "-gaussMap";
 const char* targetOBJFlag = "-to", * targetOBJLongFlag = "-targetOBJ";
+const char* resetMeshFlag = "-re", * resetMeshLongFlag = "-resetMesh";
+
 
 MSyntax CGGTCmd::newSyntax()
 {
@@ -37,6 +39,7 @@ MSyntax CGGTCmd::newSyntax()
 	syntax.addFlag(useGaussFlag, useGaussLongFlag, MSyntax::kString);
 	syntax.addFlag(gaussMapFlag, gaussMapLongFlag, MSyntax::kString);
 	syntax.addFlag(targetOBJFlag, targetOBJLongFlag, MSyntax::kString);
+	syntax.addFlag(resetMeshFlag, resetMeshLongFlag, MSyntax::kString);
 	return syntax;
 }
 
@@ -57,7 +60,9 @@ MStatus CGGTCmd::doIt(const MArgList& args)
 	MString useGaussArg = "";
 	MString gaussMapArg = "";
 	MString targetOBJArg = "";
+	MString resetMeshArg = "";
 	MArgDatabase argData(syntax(), args);
+
 
 	// Check for cubeness argument
 	if (argData.isFlagSet(cubenessFlag)) {
@@ -133,10 +138,17 @@ MStatus CGGTCmd::doIt(const MArgList& args)
 	}
 	MString targetOBJFilename = targetOBJArg.asChar();
 
+	// Check for resetMesh argument
+	if (argData.isFlagSet(resetMeshFlag)) {
+		argData.getFlagArgument(resetMeshFlag, 0, resetMeshArg);
+		MGlobal::displayInfo("resetMesh: " + resetMeshArg);
+	}
+	MString resetMeshVal = resetMeshArg.asChar();
+
 	// Initialize command line argument struct
 	commandArgs cubicArgs(cubeness, cubenessX, cubenessY, cubenessZ, 
 						  useAxis, useGauss, iterations, reduction, 
-						  reference_frame, gaussMapFilename, targetOBJFilename);
+						  reference_frame, resetMeshVal, gaussMapFilename, targetOBJFilename);
 
 	// Call cubic stylization function
 	std::vector<Vertex> V;

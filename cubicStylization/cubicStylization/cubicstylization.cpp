@@ -17,25 +17,123 @@ void cubicStylization(std::vector<Vertex>& Vi, commandArgs& args)
 	MGlobal::displayInfo(nodeFn.name().asChar());
 	MFnMesh selectedObject(node);
 
+
+	if (args.resetMesh == "reset") {
+		MFloatPointArray vertPositionsList;
+		selectedObject.getPoints(vertPositionsList, MSpace::kWorld);
+
+
+		std::ifstream resetVertPos;
+		resetVertPos.open("C:/Users/missyGL/Documents/atool/cggt/cubicStylization/data/resetVertPos.txt");
+
+		std::string lineBuffer = "";
+		std::string tokenName = "";
+		double x, y, z = 0.0;
+		int iter = 0;
+		MFloatPointArray resetVertexPositions(vertPositionsList.length());
+		while (std::getline(resetVertPos, lineBuffer)) {
+			
+			std::stringstream ss(lineBuffer);
+			ss >> x;
+			ss >> y;
+			ss >> z;
+
+			resetVertexPositions[iter].x = x;
+			resetVertexPositions[iter].y = y;
+			resetVertexPositions[iter].z = z;
+			iter++;
+		}
+
+
+		resetVertPos.close();
+		selectedObject.setPoints(resetVertexPositions);
+		return;
+	}
+
 	// Get transformation matrix
 	MString transformMatCmd = "xform -q -ws -m";
 	MDoubleArray transformMatListDouble;
 	MGlobal::executeCommand(transformMatCmd, transformMatListDouble);
 
-	std::ofstream localAxesAngles;
-	localAxesAngles.open("C:/Users/megan/Documents/school/spring22/cis660/atool/CGGT/cubicStylization/data/localAxes.txt");
-	MatrixXd transformMatData = MatrixXd::Identity(4,4);
-	if (args.referenceFrame == "Local") {
+	MatrixXd transformMatData = MatrixXd::Identity(4, 4);
+	if (args.referenceFrame == "Global") {
+		// if global, write identity matrix to file
+
+		std::ofstream localAxesAngles;
+		localAxesAngles.open("C:/Users/missyGL/Documents/atool/cggt/cubicStylization/data/localAxes.txt");
 		int tMatIndex = 0;
+		localAxesAngles << nodeFn.name().asChar() << " ";
 		for (int ti = 0; ti < 4; ++ti) {
 			for (int tj = 0; tj < 4; ++tj) {
-				transformMatData(tj, ti) = transformMatListDouble[tMatIndex];
-				localAxesAngles << transformMatListDouble[tMatIndex] << " ";
+				localAxesAngles << transformMatData(tj, ti) << " ";
 				tMatIndex++;
 			}
 		}
+		localAxesAngles.close();
 	}
-	localAxesAngles.close();
+	
+	
+	
+	if (args.referenceFrame == "Local") {
+		std::ifstream fileOpenCheck;
+		fileOpenCheck.open("C:/Users/missyGL/Documents/atool/cggt/cubicStylization/data/localAxes.txt");
+		if (fileOpenCheck) {
+			// if local and file exists, try to read in the data there for our transformation matrix
+			std::string lineBuffer = "";
+			std::string tokenName = "";
+			int tMatIndex = 0;
+			int comparisonVal = 0;
+			std::getline(fileOpenCheck, lineBuffer);
+			std::stringstream ss(lineBuffer);
+			double num = 0.0;
+			ss >> tokenName;
+			MString myName = tokenName.c_str();
+			bool isSameObj = myName == nodeFn.name();
+			if (isSameObj) {
+				for (int ti = 0; ti < 4; ++ti) {
+					for (int tj = 0; tj < 4; ++tj) {
+						ss >> num;
+						if (transformMatData(tj, ti) == num) {
+							comparisonVal++;
+						}
+						transformMatData(tj, ti) = num;
+					}
+				}
+			}
+			fileOpenCheck.close();
+			if (comparisonVal == 16 || !isSameObj) {
+				// if file matrix is transform or they are not describing the same object, rewrite
+				std::ofstream localAxesAngles;
+				localAxesAngles.open("C:/Users/missyGL/Documents/atool/cggt/cubicStylization/data/localAxes.txt");
+				int tMatIndex = 0;
+				localAxesAngles << nodeFn.name().asChar() << " ";
+				for (int ti = 0; ti < 4; ++ti) {
+					for (int tj = 0; tj < 4; ++tj) {
+						transformMatData(tj, ti) = transformMatListDouble[tMatIndex];
+						localAxesAngles << transformMatListDouble[tMatIndex] << " ";
+						tMatIndex++;
+					}
+				}
+				localAxesAngles.close();
+			}
+		}
+		else {
+			// if local and hasnt been created write orientation to file
+			fileOpenCheck.close();
+			std::ofstream localAxesAngles;
+			localAxesAngles.open("C:/Users/missyGL/Documents/atool/cggt/cubicStylization/data/localAxes.txt");
+			int tMatIndex = 0;
+			localAxesAngles << nodeFn.name().asChar() << " ";
+			for (int ti = 0; ti < 4; ++ti) {
+				for (int tj = 0; tj < 4; ++tj) {
+					transformMatData(tj, ti) = transformMatListDouble[tMatIndex];
+					localAxesAngles << transformMatListDouble[tMatIndex] << " ";
+					tMatIndex++;
+				}
+			}
+			localAxesAngles.close();
+		}
+	}
 	std::stringstream s1s;
 	s1s << transformMatData;
 	MGlobal::displayInfo(("ReferenceFrameTransform: \n" + s1s.str()).c_str());
@@ -67,6 +165,13 @@ void cubicStylization(std::vector<Vertex>& Vi, commandArgs& args)
 	MatrixXd Vi_positions(Vi.size(), 3);
 	MatrixXd V_positions(Vi.size(), 3);
 	MatrixXd Vd_positions(Vi.size(), 3);
+
+	std::ofstream resetVertPos;
+	resetVertPos.open("C:/Users/missyGL/Documents/atool/cggt/cubicStylization/data/resetVertPos.txt");
+	for (int b = 0; b < Vi.size(); ++b) {
+		resetVertPos << Vi[b].position(0) << " " << Vi[b].position(1) << " " << Vi[b].position(2) << std::endl;
+	}
+	resetVertPos.close();
 
 	for (unsigned int i = 0; i < Vi.size(); ++i) {
 		Vi_positions(i, 0) = Vi[i].position(0);

@@ -4,12 +4,12 @@
 
 struct commandArgs {
 
-	commandArgs(double c, double cX, double cY, double cZ, int useA, int useG, int it, double rp, MString &ref, MString &gauss, MString &tobj)
+	commandArgs(double c, double cX, double cY, double cZ, int useA, int useG, int it, double rp, MString &ref, MString &re, MString &gauss, MString &tobj)
 		: cubeness(c), cubenessX(cX), cubenessY(cY), cubenessZ(cZ),
 		usePerAxisVals(useA), useGaussMap(useG),
 		randomCubeness(false), randomMin(0.01), randomMax(3.0),
 		iterations(it), reductionPercent(rp), 
-		referenceFrame(ref), gaussMap(gauss), targetObj(tobj)
+		referenceFrame(ref), resetMesh(re), gaussMap(gauss), targetObj(tobj)
 	{}
 
 	// Cubeness factors
@@ -26,6 +26,7 @@ struct commandArgs {
 	int iterations;
 	double reductionPercent;
 	MString referenceFrame;
+	MString resetMesh;
 
 	// Files
 	MString gaussMap;
