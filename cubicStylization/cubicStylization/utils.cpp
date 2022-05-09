@@ -7,13 +7,6 @@ void precompute(std::vector<Vertex>&Vi, globalData & data, commandArgs & args) {
 	data.selectedObject.getPoints(vertPositionsList, MSpace::kWorld);
 	data.vertexPositions = vertPositionsList;
 
-	/*for (int wu = 0; wu < 10; wu++) {
-		for (int wv = 0; wv < 10; wv++) {
-			float r_value = gaussMapImg(wu, wv, 0, 0);
-			MGlobal::displayInfo(("test val " + std::to_string(wu) + " " + std::to_string(wv) + " " + std::to_string(r_value)).c_str());
-		}
-	}*/
-
 	Vi.resize(vertPositionsList.length());
 
 	// Get vertex positions as matrix
@@ -59,9 +52,6 @@ void precompute(std::vector<Vertex>&Vi, globalData & data, commandArgs & args) {
 		MGlobal::displayInfo(("Face normal: \n" + std::to_string(faceNormals[fn][0]) + " " + std::to_string(faceNormals[fn][1]) + " " + std::to_string(faceNormals[fn][2])).c_str());
 	}
 
-	/*data.cubeNormals = {MFloatPoint(1, 0, 0), MFloatPoint(-1, 0, 0),
-											 MFloatPoint(0, 1, 0), MFloatPoint(0, -1, 0),
-											 MFloatPoint(0, 0, 1), MFloatPoint(0, 0, -1) };*/
 	data.cubeNormals = faceNormals;
 	for (int cn = 0; cn < faceNormals.size(); ++cn) {
 		VectorXd normalVec(4);
@@ -87,11 +77,8 @@ void precompute(std::vector<Vertex>&Vi, globalData & data, commandArgs & args) {
 
 			int gaussMapU = ((0.5f * vertexNormal[0]) + 0.5f) * gaussMapWidth;
 			int gaussMapV = ((0.5f * vertexNormal[1]) + 0.5f) * gaussMapHeight;
-			//MGlobal::displayInfo(("pixel u " + std::to_string(vi) + ": " + std::to_string(gaussMapU)).c_str());
-			//MGlobal::displayInfo(("pixel v " + std::to_string(vi) + ": " + std::to_string(gaussMapV)).c_str());
 
 			float r_value = gaussMapImg(gaussMapU, gaussMapV, 0, 0);
-			//MGlobal::displayInfo(("pixel red component" + std::to_string(vi) + ": " + std::to_string(r_value)).c_str());
 			gaussMapVals[vi] = r_value;
 		}
 	}
@@ -246,11 +233,14 @@ void getGlobalMatrices(MatrixXd& Vi, std::vector<Vertex>& Vd, MatrixXi& F, Spars
 	Q = 3.0 * Q;
 
 	// K
+	// explanation by alec jacobson in: https://github.com/alecjacobson/geometry-processing-deformation
 	int numVerts = Vd.size();
 	K.resize(9 * numVerts, 3 * numVerts);
 
-	std::vector<Triplet<double>> KIJV;
-	KIJV.reserve(27 * numVerts * numVerts);
+	// use set from triplets to efficiently add and subtract our values to K as we go through the vertices
+	std::vector<Triplet<double>> K_triplets;
+	K_triplets.reserve(27 * numVerts * numVerts);
+
 	for (int i = 0; i < numVerts; ++i) {
 
 		MatrixXi E_i = Vd[i].Ei;
@@ -260,25 +250,25 @@ void getGlobalMatrices(MatrixXd& Vi, std::vector<Vertex>& Vd, MatrixXi& F, Spars
 		// Loop over each of the spokes and rims
 		for (int j = 0; j < numEdges; ++j) {
 
+			// get our current edges and weight
 			int ep0 = E_i(j, 0);
 			int ep1 = E_i(j, 1);
 			double wij = W.coeffRef(j, j);
 
 			for (int dimSum = 0; dimSum < 3; ++dimSum) {
 
-				// Calculate constants
-				double valIJ = wij * (Vi(ep0, dimSum) - Vi(ep1, dimSum));
-				double valJI = wij * (Vi(ep1, dimSum) - Vi(ep0, dimSum));
+				// Calculate e_ij_B that we add to (and subtract from) index within K matrix
+				double e_ij_B = wij * (Vi(ep0, dimSum) - Vi(ep1, dimSum));
 
-				// Set elements in matrix
-				KIJV.push_back(Triplet<double>(dimSum + 9 * i, ep0, valIJ));
-				KIJV.push_back(Triplet<double>(dimSum + 9 * i, ep1, valJI));
-				KIJV.push_back(Triplet<double>(dimSum + 9 * i + 3, ep0 + numVerts, valIJ));
-				KIJV.push_back(Triplet<double>(dimSum + 9 * i + 3, ep1 + numVerts, valJI));
-				KIJV.push_back(Triplet<double>(dimSum + 9 * i + 6, ep0 + 2 * numVerts, valIJ));
-				KIJV.push_back(Triplet<double>(dimSum + 9 * i + 6, ep1 + 2 * numVerts, valJI));
+				// for each of the 3 blocks in our K matrix
+				int row_within_block = dimSum + 9 * i;
+				for (int n = 0; n < 3; n++) {
+					int row_of_block = row_within_block + (n * 3);
+					K_triplets.push_back(Triplet<double>(row_of_block, ep0 + numVerts * n, e_ij_B));
+					K_triplets.push_back(Triplet<double>(row_of_block, ep1 + numVerts * n, -e_ij_B));
+				}
 			}
 		}
 	}
-	K.setFromTriplets(KIJV.begin(), KIJV.end());
+	K.setFromTriplets(K_triplets.begin(), K_triplets.end());
 }

@@ -19,10 +19,8 @@ void cubicStylization(std::vector<Vertex>& Vi, commandArgs& args)
 
 	// decide which file path to use
 	std::string resetPath = "C:/Users/megan/Documents/school/spring22/cis660/atool/CGGT/cubicStylization/data/resetVertPos.txt";
-	//std::string resetPath = "C:/Users/missyGL/Documents/atool/cggt/cubicStylization/data/resetVertPos.txt";
 
 	std::string axesPath = "C:/Users/megan/Documents/school/spring22/cis660/atool/CGGT/cubicStylization/data/localAxes.txt";
-	//std::string axesPath = "C:/Users/missyGL/Documents/atool/cggt/cubicStylization/data/localAxes.txt";
 
 	if (args.resetMesh == "reset") {
 		MFloatPointArray vertPositionsList;
@@ -157,7 +155,6 @@ void cubicStylization(std::vector<Vertex>& Vi, commandArgs& args)
 	globalData stylizationData(node);
 
 	// Set transformation matrix
-	//stylizationData.transformMat.resize(4, 4);
 	stylizationData.transformMat = transformMatData;
 
 	// Precomputation
@@ -210,7 +207,6 @@ void cubicStylization(std::vector<Vertex>& Vi, commandArgs& args)
 	// Update vertices to deformed vertices
 	MFloatPointArray deformedVertexPositions(Vd_positions.rows());
 	for (int n = 0; n < Vd_positions.rows(); ++n) {
-		//Vd_positions.row(n) = Vd_positions.row(n) + Vi[n].nk * 1.0;
 		deformedVertexPositions[n].x = Vd_positions(n, 0);
 		deformedVertexPositions[n].y = Vd_positions(n, 1);
 		deformedVertexPositions[n].z = Vd_positions(n, 2);
