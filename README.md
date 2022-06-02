@@ -1,6 +1,8 @@
 # CGGT
 Cube Geometry Generating Tool (CGGT)
 
+![](./shapebois.png)
+
 Based on the Paper "Cubic Stylization" from SIGGRAPH Asia 2019 by Hsueh-Ti Derek Liu and Alec Jacobson from the University of Toronto (https://www.dgp.toronto.edu/projects/cubic-stylization/)
 
 Built for Maya 2022 with Visual Studio 2019
