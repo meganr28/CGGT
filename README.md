@@ -1,7 +1,8 @@
 # CGGT
 Cube Geometry Generating Tool (CGGT)
 
-![](./shapebois.PNG)
+![](./shapeboisResized.png)
+![](./cows.png)
 
 Video demonstration: https://drive.google.com/file/d/1TP9REalRHT53HXzBTmgo3fn2prSPU2jl/view?usp=sharing
 
